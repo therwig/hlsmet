@@ -5,6 +5,7 @@
 #include <cmath>
 #include "ap_int.h"
 #include "ap_fixed.h"
+#include "hls_math.h"
 
 // For testing
 #define NTEST 1000
@@ -168,53 +169,73 @@ void init_atan_table(phi_T table_out[ATAN_TAB_SIZE]) {
     return;
 }
 
+#define ACOS_SIZE PHI_SIZE
+#define ACOS_TAB_SIZE (1<<ACOS_SIZE)
+
+template<class phi_T>
+void init_acos_table(phi_T table_out[ACOS_TAB_SIZE]){
+	int INDEX = 0;
+	for(int i = ACOS_TAB_SIZE-1; i > -1; i--){
+		table_out[INDEX] = acos(2*((ACOS_TAB_SIZE-1)-i)/float(ACOS_TAB_SIZE)-1);
+		INDEX++;
+	}
+	return;
+}
+
 template<class pxy_T, class phi_T, class pt_T>
-    void PhiFromXY(pxy_T px, pxy_T py, phi_T &phi){
+//template<class pxy_T, class pxy_T, class phi_T>
+    void PhiFromXY(pxy_T px, pxy_T py, pt_T pt, phi_T &phi){
 
     // Initialize the lookup tables
 #ifdef __HLS_SYN__
     bool initialized = false;
     pt_t inv_table[INV_TAB_SIZE];
-    pt_t atan_table[ATAN_TAB_SIZE];
+    pt_t acos_table[ACOS_TAB_SIZE];
 #else 
     static bool initialized = false;
     static pt_t inv_table[INV_TAB_SIZE];
-    static pt_t atan_table[ATAN_TAB_SIZE];
+    static pt_t acos_table[ACOS_TAB_SIZE];
 #endif
     if (!initialized) {
         init_inv_table(inv_table);
-        init_atan_table(atan_table);
+        init_acos_table(acos_table);
         initialized = true;
     }
 
-    if(px==0 && py==0){ phi = 0; return; }
+    if(px==0 && pt==0){ phi = 0; return; }
+	int index;
+	index = (((px/hls::sqrt(pt))+1)/2)*ACOS_TAB_SIZE;
+	if(index<0) index = 0;
+	if(index>ACOS_TAB_SIZE-1) index = ACOS_TAB_SIZE-1;
+	phi = acos_table[index];
+	if(py < 0) phi = -phi;
 
     // get q1 coordinates
-    pt_t x =  px; //px>=0 ? px : -px;
-    pt_t y =  py; //py>=0 ? py : -py;
-    if(px<0) x = -px;
-    if(py<0) y = -py;
-    // transform so a<b
-    pt_t a = x; //x<y ? x : y;
-    pt_t b = y; //x<y ? y : x;
-    if(a>b){ a = y; b = x; }
-
-    pt_t inv_b;
-    if(b>= (1<<(PT_SIZE-DROP_BITS))) inv_b = 1; 
-    // don't bother to store these large numbers in the LUT...
-    // instead approximate their inverses as 1
-    else inv_b = inv_table[b];
-
-    pt_t a_over_b = a * inv_b; // x 2^(PT_SIZE-DROP_BITS)
-    ap_uint<ATAN_SIZE> atan_index = a_over_b >> (PT_SIZE-ATAN_SIZE); // keep only most significant bits
-    phi = atan_table[atan_index];
-
-    // rotate from (0,pi/4) to full quad1
-    if(y>x) phi = (1<<(PHI_SIZE-2)) - phi; //phi = pi/2 - phi
-    // other quadrants
-    if( px < 0 && py > 0 ) phi = (1<<(PHI_SIZE-1)) - phi;    // Q2 phi = pi - phi
-    if( px > 0 && py < 0 ) phi = -phi;                       // Q4 phi = -phi
-    if( px < 0 && py < 0 ) phi = -((1<<(PHI_SIZE-1)) - phi); // Q3 composition of both
+//    pt_t x =  px; //px>=0 ? px : -px;
+//    pt_t y =  pt; //py>=0 ? py : -py;
+//    if(px<0) x = -px;
+//    if(py<0) y = -py;
+//    // transform so a<b
+//    pt_t a = x; //x<y ? x : y;
+//    pt_t b = y; //x<y ? y : x;
+//    if(a>b){ a = y; b = x; }
+//
+//    pt_t inv_b;
+//    if(b>= (1<<(PT_SIZE-DROP_BITS))) inv_b = 1; 
+//    // don't bother to store these large numbers in the LUT...
+//    // instead approximate their inverses as 1
+//    else inv_b = inv_table[b];
+//
+//    pt_t a_over_b = a * inv_b; // x 2^(PT_SIZE-DROP_BITS)
+//    ap_uint<ATAN_SIZE> atan_index = a_over_b >> (PT_SIZE-ATAN_SIZE); // keep only most significant bits
+//    phi = atan_table[atan_index];
+//
+//    // rotate from (0,pi/4) to full quad1
+//    if(y>x) phi = (1<<(PHI_SIZE-2)) - phi; //phi = pi/2 - phi
+//    // other quadrants
+//    if( px < 0 && py > 0 ) phi = (1<<(PHI_SIZE-1)) - phi;    // Q2 phi = pi - phi
+//    if( px > 0 && py < 0 ) phi = -phi;                       // Q4 phi = -phi
+//    if( px < 0 && py < 0 ) phi = -((1<<(PHI_SIZE-1)) - phi); // Q3 composition of both
 
     return;
 }

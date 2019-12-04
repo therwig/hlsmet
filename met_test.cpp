@@ -175,7 +175,7 @@ int full_alg_test() {
         }
         pt2_t out_pt2_hw = hw_sum_x*hw_sum_x + hw_sum_y*hw_sum_y;
         pt_t hw_ratio;
-        PhiFromXY(hw_sum_x,hw_sum_y,out_phi_hw, hw_ratio);
+        PhiFromXY<pxy_t, phi_t, phi_t>(hw_sum_x,hw_sum_y,out_pt2_hw,out_phi_hw);//, hw_ratio);
 
 
         //

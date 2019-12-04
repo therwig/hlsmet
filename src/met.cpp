@@ -37,7 +37,8 @@ void met_hw(pt_t data_pt[NPART], phi_t data_phi[NPART], pt2_t& res_pt2, phi_t& r
 
     res_pt2 = sum_x*sum_x + sum_y*sum_y;
 
-    PhiFromXY(sum_x,sum_y,res_phi);
+    //PhiFromXY<pxy_t, phi_t, phi_t>(sum_x,sum_y,res_phi);
+    PhiFromXY(sum_x,sum_y,res_pt2,res_phi);
 
     return;
 }
