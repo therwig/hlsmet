@@ -15,14 +15,17 @@ def draw(t,var,hname):
 
 # tree
 fname="results.txt"
-fname="full_results.txt"
-for npart in [1,10,50,100,150]:
+#fname="full_results.txt"
+# for npart in [1,10,50,100,150]:
+for npart in [1]:
     t = ROOT.TTree("t","")
-    fname="output/n{}_10k.txt".format(npart)
-    t.ReadFile(fname,"ref:refphi:refx:refy:refrat:hw:hwphi:hwx:hwy:hwrat:hwratNoLUT")
+    # fname="output/n{}_10k.txt".format(npart)
+    # # t.ReadFile(fname,"ref:refphi:refx:refy:refrat:hw:hwphi:hwx:hwy:hwrat:hwratNoLUT")
     # if "full" in fname: t.ReadFile(fname,"ref:refphi:refx:refy:refrat:hw:hwphi:hwx:hwy:hwrat:hwratNoLUT")
     # else: t.ReadFile(fname,"ref:refphi:hw:hwphi")
-    
+    fname="results.txt"
+    t.ReadFile(fname,"ref:refphi:hw:hwphi")
+
     #hists
     h=OrderedDict()
     
@@ -99,7 +102,8 @@ for npart in [1,10,50,100,150]:
     
     
     
-    outname="output/hists_n{}_10k.root".format(npart)
+    #outname="output/hists_n{}_10k.root".format(npart)
+    outname="output.root".format(npart)
     f = ROOT.TFile(outname,"recreate")
     for x in h: h[x].Write()
     f.Close()

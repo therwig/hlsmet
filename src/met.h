@@ -174,17 +174,22 @@ void init_atan_table(phi_T table_out[ATAN_TAB_SIZE]) {
 
 template<class phi_T>
 void init_acos_table(phi_T table_out[ACOS_TAB_SIZE]){
-	int INDEX = 0;
-	for(int i = ACOS_TAB_SIZE-1; i > -1; i--){
-		table_out[INDEX] = acos(2*((ACOS_TAB_SIZE-1)-i)/float(ACOS_TAB_SIZE)-1);
-		INDEX++;
-	}
-	return;
+	/* int INDEX = 0;  */
+        /* for(int i = ACOS_TAB_SIZE-1; i > -1; i--){  */
+        /*     table_out[INDEX] = acos(2*((ACOS_TAB_SIZE-1)-i)/float(ACOS_TAB_SIZE)-1); */
+        /*     INDEX++; */
+        /* } */
+    std::cout << "initializing acos table \n";
+    for(int i = 0; i<ACOS_TAB_SIZE; i++){
+        table_out[i] = (1<<(PHI_SIZE-2)) * acos(i/float(ACOS_TAB_SIZE-1)); // maps [0, 1023] to [acos(0), acos(1023/1023)]
+        std::cout << "  " << i << " -> " << table_out[i] << std::endl;
+    }
+    return;
 }
 
-template<class pxy_T, class phi_T, class pt_T>
+template<class pxy_T, class phi_T, class pt2_T>
 //template<class pxy_T, class pxy_T, class phi_T>
-    void PhiFromXY(pxy_T px, pxy_T py, pt_T pt, phi_T &phi){
+    void PhiFromXY(pxy_T px, pxy_T py, pt2_T pt2, phi_T &phi){
 
     // Initialize the lookup tables
 #ifdef __HLS_SYN__
@@ -202,13 +207,38 @@ template<class pxy_T, class phi_T, class pt_T>
         initialized = true;
     }
 
-    if(px==0 && pt==0){ phi = 0; return; }
-	int index;
-	index = (((px/hls::sqrt(pt))+1)/2)*ACOS_TAB_SIZE;
-	if(index<0) index = 0;
-	if(index>ACOS_TAB_SIZE-1) index = ACOS_TAB_SIZE-1;
-	phi = acos_table[index];
-	if(py < 0) phi = -phi;
+    if(px==0 && pt2==0){ phi = 0; return; }
+    pxy_T absval_px = px;
+    if (px < 0) absval_px = -px;
+    // use hls::sqrt to avoid huge lookup table
+    pt_t pt = hls::sqrt(pt2);
+
+    pt_t inv_pt = 1;
+    if(pt< (1<<(PT_SIZE-DROP_BITS))) inv_pt = inv_table[pt];
+    
+    //index converts px/pt (in [0,1]) to a number between [0,1023]
+    ap_uint<ACOS_SIZE> index = absval_px * inv_pt * (ACOS_TAB_SIZE-1);
+    if(index<0) index = 0;
+    if(index>ACOS_TAB_SIZE-1) index = ACOS_TAB_SIZE-1;
+    phi = acos_table[index];
+    
+
+    //index = (((px/hls::sqrt(pt))+1)/2)*ACOS_TAB_SIZE;
+    /* std::cout << "absval_px=" << int(absval_px) << "  pt=" << int(hls::sqrt(pt)) << "  (tab size-1)=" << int((ACOS_TAB_SIZE-1)) << "  phi=" << int(absval_px/hls::sqrt(pt)*(ACOS_TAB_SIZE-1)) << std::endl; */
+    std::cout 
+        << "px=" << int(px) 
+        << "  py=" << int(py) 
+        << "  pt2=" << int(pt2) 
+        << "  pt=" << int(pt) 
+        << "  1/pt=" << int(inv_pt) 
+        << "  index=" << int(index) 
+        << "  phi=" << int(phi) 
+        << std::endl;
+
+    //convert phi from (0,pi/2) to (-pi to pi)
+    if(px < 0) phi = (1<<(PHI_SIZE-1)) - phi; // 2pi = 2^PHI_SIZE, so pi = 1<<(PHI_SIZE-1)
+    if(py < 0) phi = -phi;
+
 
     // get q1 coordinates
 //    pt_t x =  px; //px>=0 ? px : -px;
