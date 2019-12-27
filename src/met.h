@@ -169,7 +169,7 @@ void init_atan_table(phi_T table_out[ATAN_TAB_SIZE]) {
     return;
 }
 
-#define ACOS_SIZE PHI_SIZE
+#define ACOS_SIZE PHI_SIZE-2
 #define ACOS_TAB_SIZE (1<<ACOS_SIZE)
 
 template<class phi_T>
