@@ -10,7 +10,7 @@ MET calculation from PF objects
 #include "ap_fixed.h"
 #include "src/met.h"
 
-int alg_test() {
+int alg_test(const char* dumpfile="") {
     // The conventional test algorithm that compares the final outputs 
     // of HLS and floating point calculations
 
@@ -175,7 +175,8 @@ int full_alg_test() {
         }
         pt2_t out_pt2_hw = hw_sum_x*hw_sum_x + hw_sum_y*hw_sum_y;
         pt_t hw_ratio;
-        PhiFromXY(hw_sum_x,hw_sum_y,out_phi_hw, hw_ratio);
+        //PhiFromXY(hw_sum_x,hw_sum_y,out_phi_hw, hw_ratio);
+        PhiFromXY(hw_sum_x,hw_sum_y,out_phi_hw);
 
 
         //
