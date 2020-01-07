@@ -22,8 +22,10 @@ void met_ref(float in_pt[NPART], float in_phi[NPART], float& out_pt, float& out_
 
     if(DEBUG){
         std::cout << "     x/tot = " << met_x/out_pt << " \t ";
+        std::cout << "  abs(x)/tot = " << fabs(met_x)/out_pt << " \t ";
         std::cout << "(x/tot)^2 = " << pow(met_x/out_pt,2) << " \t ";
         std::cout << "acos(x/tot) = " << acos(met_x/out_pt) << " \t ";
+        std::cout << "acos(abs(x/tot)) = " << acos(fabs(met_x)/out_pt) << " \t ";
         std::cout << "rotated = " << out_phi << " \n ";
 
         std::cout << "     met = " << out_pt << " \t ";

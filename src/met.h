@@ -8,10 +8,10 @@
 #include "hls_math.h"
 
 // For testing
-#define NTEST 1000
-#define NPART 100
+#define NTEST 5
+#define NPART 2
 #define FLOATPI 3.141593
-#define DEBUG 0
+#define DEBUG 1
 
 //
 // Input / Output types
@@ -179,10 +179,10 @@ void init_acos_table(phi_T table_out[ACOS_TAB_SIZE]){
         /*     table_out[INDEX] = acos(2*((ACOS_TAB_SIZE-1)-i)/float(ACOS_TAB_SIZE)-1); */
         /*     INDEX++; */
         /* } */
-    std::cout << "initializing acos table \n";
+    //std::cout << "initializing acos table \n";
     for(int i = 0; i<ACOS_TAB_SIZE; i++){
-        table_out[i] = (1<<(PHI_SIZE-2)) * acos(i/float(ACOS_TAB_SIZE-1)); // maps [0, 1023] to [acos(0), acos(1023/1023)]
-        std::cout << "  " << i << " -> " << table_out[i] << std::endl;
+        table_out[i] = (1<<(PHI_SIZE-2)) * acos(i/float(ACOS_TAB_SIZE-1)) / (FLOATPI/2); // maps [0, 1023] to [acos(0), acos(1023/1023)]
+        //std::cout << "  " << i << " -> " << table_out[i] << std::endl;
     }
     return;
 }
@@ -215,12 +215,28 @@ template<class pxy_T, class phi_T, class pt2_T>
 
     pt_t inv_pt = 1;
     if(pt< (1<<(PT_SIZE-DROP_BITS))) inv_pt = inv_table[pt];
-    
+    std::cout << "pt is " << pt <<std::endl;
+    std::cout << "inv_pt is " << inv_pt <<std::endl;
+
+    std::cout << "absval_px is " << absval_px <<std::endl;
+    std::cout << "absval_px * inv_pt is " << (absval_px * inv_pt) <<std::endl;
+
     //index converts px/pt (in [0,1]) to a number between [0,1023]
-    ap_uint<ACOS_SIZE> index = absval_px * inv_pt * (ACOS_TAB_SIZE-1);
+    /* ap_uint<ACOS_SIZE> index = absval_px * inv_pt * (ACOS_TAB_SIZE-1); */
+    // bit shift to get # bits equal to ACOS_SIZE
+    ap_uint<ACOS_SIZE> index = (absval_px * inv_pt) >> ((PT_SIZE)-(ACOS_SIZE));
+    std::cout << "PT_SIZE-ACOS_SIZE = " << ((PT_SIZE)-(ACOS_SIZE)) << std::endl;
+
+    std::cout << "PT_SIZE = " << PT_SIZE << std::endl;
+    std::cout << "PHI_SIZE = " << PHI_SIZE << std::endl;
+    std::cout << "ACOS_SIZE = " << ACOS_SIZE << std::endl;
+
+    std::cout << "index is " << index << "  " << float(index)/(1<<ACOS_SIZE) << std::endl;
     if(index<0) index = 0;
     if(index>ACOS_TAB_SIZE-1) index = ACOS_TAB_SIZE-1;
     phi = acos_table[index];
+    std::cout << "phi is " << phi << " " << float(phi)/256.*3.1415/2. <<std::endl;
+
     
 
     //index = (((px/hls::sqrt(pt))+1)/2)*ACOS_TAB_SIZE;

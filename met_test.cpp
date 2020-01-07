@@ -57,6 +57,8 @@ int alg_test() {
             if(DEBUG){
                 std::cout << " \t part pt " << in_pt[j];
                 std::cout << "\t phi " << in_phi[j];
+                std::cout << " \t px " << in_pt[j]*sin(in_phi[j]);
+                std::cout << " \t py " << in_pt[j]*cos(in_phi[j]);
                 std::cout << std::endl;
             }
         }
