@@ -181,7 +181,7 @@ void init_acos_table(phi_T table_out[ACOS_TAB_SIZE]){
         /* } */
     std::cout << "initializing acos table \n";
     for(int i = 0; i<ACOS_TAB_SIZE; i++){
-        table_out[i] = (1<<(PHI_SIZE-2)) * acos(i/float(ACOS_TAB_SIZE-1)); // maps [0, 1023] to [acos(0), acos(1023/1023)]
+        table_out[i] = (1<<(PHI_SIZE-2)) * acos(i/float(ACOS_TAB_SIZE-1)) / (FLOATPI/2); // maps [0, 1023] to [acos(0), acos(1023/1023)] *** 3.1415/2
         std::cout << "  " << i << " -> " << table_out[i] << std::endl;
     }
     return;
@@ -217,7 +217,8 @@ template<class pxy_T, class phi_T, class pt2_T>
     if(pt< (1<<(PT_SIZE-DROP_BITS))) inv_pt = inv_table[pt];
     
     //index converts px/pt (in [0,1]) to a number between [0,1023]
-    ap_uint<ACOS_SIZE> index = absval_px * inv_pt * (ACOS_TAB_SIZE-1);
+    //ap_uint<ACOS_SIZE> index = absval_px * inv_pt / (ACOS_TAB_SIZE-1);
+    ap_uint<ACOS_SIZE> index = (absval_px * inv_pt) >> ((PT_SIZE)-(ACOS_SIZE));
     if(index<0) index = 0;
     if(index>ACOS_TAB_SIZE-1) index = ACOS_TAB_SIZE-1;
     phi = acos_table[index];

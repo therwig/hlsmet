@@ -60,6 +60,14 @@ int alg_test() {
                 std::cout << std::endl;
             }
         }
+		in_pt[0] = 50;
+		in_pt[1] = 75;
+		in_phi[0] = 1.308;
+		in_phi[1] = 0.;
+		in_pt_hw[0] = 50 * (1<<PT_DEC_BITS);
+		in_pt_hw[1] = 75 * (1<<PT_DEC_BITS);
+		in_phi_hw[0] = int(1.308 * (1<<PHI_SIZE)/(2*FLOATPI));
+		in_phi_hw[1] = int(0. * (1<<PHI_SIZE)/(2*FLOATPI));
         out_pt2_hw=0.; out_phi_hw=0.;
         out_pt=0.; out_phi=0.;
         
