@@ -9,8 +9,9 @@ MET calculation from PF objects
 #include "ap_int.h"
 #include "ap_fixed.h"
 #include "src/met.h"
+#include "DiscretePFInputs.h"
 
-int alg_test() {
+int alg_test(const char* dumpfile="") {
     // The conventional test algorithm that compares the final outputs 
     // of HLS and floating point calculations
 
@@ -21,26 +22,47 @@ int alg_test() {
     float in_pt[NPART], in_phi[NPART];
     float out_pt, out_phi;
 
-    //setup random number generator
-    std::default_random_engine generator(1776); // seed
-    std::uniform_real_distribution<float> pt_dist(10.,100.); 
-    // random pt uniformly distributed between 10 and 100 GeV for each particle
-    std::uniform_real_distribution<float> phi_dist(-FLOATPI,FLOATPI);
-    // random uniform phi
-
-    // fill random test data
+    // load the dump file output
     std::vector<std::vector<std::pair<float,float> > > vals; 
-    // Dimensions: #events=NTEST x #particles=NPART
-    // type is a pair: (pt,phi)
-    vals.resize(NTEST);
-    for(int i=0; i<NTEST; i++){
-        vals[i].resize(NPART);
-        for(int j=0; j<NPART; j++){
-            vals[i][j].first  = pt_dist(generator);
-            vals[i][j].second = phi_dist(generator);
-        }
-    }
 
+	if(*dumpfile){
+		// in any case, initialize to zeros
+		vals.resize(NTEST);
+		for(int i=0; i<NTEST; i++){
+			vals[i].resize(NPART);
+		}
+		// load the dump file output
+		FILE *f = fopen(dumpfile, "rb");
+		std::vector<l1tpf_int::PFParticle> pfs;
+
+		uint64_t ie=0;
+		while ( fread(&ie, sizeof(uint64_t), 1, f) && ie<NTEST) {
+			if (ie>15) break;
+			readManyFromFile(pfs,f);
+			printf("Event %d has %d PF candidates \n", int(ie), int(pfs.size()));
+			for(size_t ip=0;ip<pfs.size() && ip<NPART;ip++){
+				vals[ie][ip] = std::make_pair<float,float>(pfs[ip].hwPt, pfs[ip].hwPhi);
+			}
+		}
+		fclose(f);
+	} else {
+		//setup random number generator
+		std::default_random_engine generator(1776); // seed
+		std::uniform_real_distribution<float> pt_dist(10.,100.);
+		// random pt uniformly distributed between 10 and 100 GeV for each particle
+		std::uniform_real_distribution<float> phi_dist(-FLOATPI,FLOATPI);
+		// random uniform phi
+		// Dimensions: #events=NTEST x #particles=NPART
+		// type is a pair: (pt,phi)
+		vals.resize(NTEST);
+		for(int i=0; i<NTEST; i++){
+			vals[i].resize(NPART);
+			for(int j=0; j<NPART; j++){
+				vals[i][j].first  = pt_dist(generator);
+				vals[i][j].second = phi_dist(generator);
+			}
+		}
+	}
     //write results to file
     FILE *f;
     f=fopen("results.txt","w");
@@ -60,14 +82,7 @@ int alg_test() {
                 std::cout << std::endl;
             }
         }
-		in_pt[0] = 50;
-		in_pt[1] = 75;
-		in_phi[0] = 1.308;
-		in_phi[1] = 0.;
-		in_pt_hw[0] = 50 * (1<<PT_DEC_BITS);
-		in_pt_hw[1] = 75 * (1<<PT_DEC_BITS);
-		in_phi_hw[0] = int(1.308 * (1<<PHI_SIZE)/(2*FLOATPI));
-		in_phi_hw[1] = int(0. * (1<<PHI_SIZE)/(2*FLOATPI));
+
         out_pt2_hw=0.; out_phi_hw=0.;
         out_pt=0.; out_phi=0.;
         
@@ -221,7 +236,7 @@ int full_alg_test() {
 int main() {
 
     // test the algorithm
-    alg_test();
+    alg_test("/home/jhong/hlsmet/outdk.dump");
     //full_alg_test();
 
     return 0;
