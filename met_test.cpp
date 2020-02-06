@@ -16,34 +16,38 @@ int alg_test(const char* dumpfile="") {
     // of HLS and floating point calculations
 
     // calculate met for NPART particles
-    pt_t in_pt_hw[NPART];
-    pt2_t out_pt2_hw;
-    phi_t in_phi_hw[NPART], out_phi_hw;
+    typedef ap_uint<64> word_t;
+    typedef ap_uint<16> var_t;
+
+    word_t inputs[NPART];
+    word_t output;
+
+    pt_t  data_pt_hw[NPART];
+    phi_t data_phi_hw[NPART];
     float in_pt[NPART], in_phi[NPART];
+
+    pt2_t out_pt2_hw;
+    phi_t out_phi_hw;
     float out_pt, out_phi;
 
-    // load the dump file output
-    std::vector<std::vector<std::pair<float,float> > > vals; 
 
+    // load the dump file output
 	if(*dumpfile){
 		// in any case, initialize to zeros
-		vals.resize(NTEST);
-		for(int i=0; i<NTEST; i++){
-			vals[i].resize(NPART);
-		}
 		// load the dump file output
 		FILE *f = fopen(dumpfile, "rb");
 		std::vector<l1tpf_int::PFParticle> pfs;
 
 		uint64_t ie=0;
 		while ( fread(&ie, sizeof(uint64_t), 1, f) && ie<NTEST) {
-			if (ie>15) break;
-			readManyFromFile(pfs,f);
-			printf("Event %d has %d PF candidates \n", int(ie), int(pfs.size()));
+			if (ie>2) break;
+            printf("ie? %d\n",ie);
+			//printf("Event %d has %d PF candidates \n", int(ie), int(pfs.size()));
 			for(size_t ip=0;ip<pfs.size() && ip<NPART;ip++){
-				vals[ie][ip] = std::make_pair<float,float>(pfs[ip].hwPt, pfs[ip].hwPhi);
+                inputs[ip] = ie;
 			}
 		}
+
 		fclose(f);
 	} else {
 		//setup random number generator
@@ -90,7 +94,7 @@ int alg_test(const char* dumpfile="") {
         met_ref(in_pt, in_phi, out_pt, out_phi);
 
         // run HW alg
-        met_hw(in_pt_hw, in_phi_hw, out_pt2_hw, out_phi_hw);
+        met_hw(inputs, output);
 
 
         if(DEBUG) std::cout << " REF : met(pt = " << out_pt << ", phi = "<< out_phi << ")\n";

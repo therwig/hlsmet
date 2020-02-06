@@ -8,8 +8,8 @@
 #include "hls_math.h"
 
 // For testing
-#define NTEST 1000
-#define NPART 100
+#define NTEST 2
+#define NPART 60
 #define FLOATPI 3.141593
 #define DEBUG 0
 
