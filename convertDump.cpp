@@ -4,13 +4,14 @@
 #include <vector>
 #include "DiscretePFInputs.h"
 
-#define NTEST 10000
+#define NTEST 100
 
 #define DEBUG 0
 
 int main(){
     if(DEBUG) std::cout<<"test"<<std::endl;
-    const char* dumpfile="/Users/hongjieun/Documents/Correlator/hlsDump/out_VBF.dump";
+   // const char* dumpfile="/Users/hongjieun/Documents/Correlator/hlsDump/out_VBF.dump";
+   const char* dumpfile="/home/jhong/hlsmet/out_TTbar.dump";
 
     std::vector<std::vector<std::pair<float,float> > > vals;
     vals.resize(NTEST);
@@ -44,7 +45,7 @@ int main(){
     char s[16];
 
     FILE *out;
-    out=fopen("out_VBF_conv.dump","w");
+    out=fopen("out_TTbar_conv.dump","w");
 
 //    char input[row][col];
     while (fread(&ie, sizeof(uint64_t), 1, f) && ie<NTEST){
@@ -52,9 +53,9 @@ int main(){
 
         for(int i = 0; i <row; i++){
             for(int j = 0; j <col; j++){
-                pt  = pfs[j].hwPt > 0 ? pfs[j].hwPt : (1<<16)+pfs[j].hwPt;    // using two's complement
-                phi = pfs[j].hwPhi > 0 ? pfs[j].hwPhi : (1<<16)+pfs[j].hwPhi; // -32768 to -1 mapping 32768 to 65536
-                eta = pfs[j].hwEta > 0 ? pfs[j].hwEta : (1<<16)+pfs[j].hwEta;
+                pt  = pfs[j].hwPt < 0 ? (1<<16)+pfs[j].hwPt : pfs[j].hwPt;    // using two's complement
+                phi = pfs[j].hwPhi < 0 ? (1<<16)+pfs[j].hwPhi : pfs[j].hwPhi; // -32768 to -1 mapping 32768 to 65536
+                eta = pfs[j].hwEta < 0 ? (1<<16)+pfs[j].hwEta : pfs[j].hwEta;
                 id  = pfs[j].hwId;
 
                 //if(i == 0) printf("%04X%04X%04X%04X  ", pfs[j].hwPt, pfs[j].hwPhi, pfs[j].hwEta, int(1));
@@ -76,8 +77,8 @@ int main(){
             if(DEBUG) printf("\n");
             fprintf(out, "\n");
         }
-        if(DEBUG) printf("\n");
-        fprintf(out, "\n");
+    //    if(DEBUG) printf("\n");
+    //    fprintf(out, "\n");
 
     }
     fclose(out);

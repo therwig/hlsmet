@@ -2,6 +2,7 @@
 #define MET_H
 
 #include <iostream>
+#include <string>
 #include <cmath>
 #include "ap_int.h"
 #include "ap_fixed.h"
@@ -11,7 +12,7 @@
 #define NTEST 2
 #define NPART 60
 #define FLOATPI 3.141593
-#define DEBUG 0
+#define DEBUG 1
 
 //
 // Input / Output types
@@ -33,9 +34,14 @@ typedef ap_uint<PT2_SIZE> pt2_t;
 #define PHI_SIZE 10
 typedef ap_int<PHI_SIZE> phi_t;
 
+//typedef ap_uint<64> word_t;
+typedef std::string word_t;
+typedef ap_uint<16> var_t;
 // top algs
 void met_ref(float in_pt[NPART], float in_phi[NPART], float& out_pt, float& out_phi);
-void met_hw(pt_t data_pt[NPART], phi_t data_phi[NPART], pt2_t& res_pt2, phi_t& res_phi);
+//void met_ref(uint64_t inputs[NPART], uint64_t& output);
+//void met_hw(pt_t data_pt[NPART], phi_t data_phi[NPART], pt2_t& res_pt2, phi_t& res_phi);
+void met_hw(word_t inputs[NPART],  word_t& output);
 
 
 //
@@ -182,7 +188,7 @@ void init_acos_table(phi_T table_out[ACOS_TAB_SIZE]){
     std::cout << "initializing acos table \n";
     for(int i = 0; i<ACOS_TAB_SIZE; i++){
         table_out[i] = (1<<(PHI_SIZE-2)) * acos(i/float(ACOS_TAB_SIZE-1)) / (FLOATPI/2); // maps [0, 1023] to [acos(0), acos(1023/1023)] *** 3.1415/2
-        std::cout << "  " << i << " -> " << table_out[i] << std::endl;
+        if(0) std::cout << "  " << i << " -> " << table_out[i] << std::endl;
     }
     return;
 }

@@ -5,7 +5,7 @@ MET calculation from PF objects
 #include <cstdio>
 #include <utility>
 #include <random>
-
+#include <istream>
 #include "ap_int.h"
 #include "ap_fixed.h"
 #include "src/met.h"
@@ -16,40 +16,68 @@ int alg_test(const char* dumpfile="") {
     // of HLS and floating point calculations
 
     // calculate met for NPART particles
-    typedef ap_uint<64> word_t;
-    typedef ap_uint<16> var_t;
-
     word_t inputs[NPART];
     word_t output;
+	float inputs_ref[NPART];
+	float output_ref;
 
-    pt_t  data_pt_hw[NPART];
-    phi_t data_phi_hw[NPART];
-    float in_pt[NPART], in_phi[NPART];
-
+    //pt_t  in_pt_hw[NPART];
+   // phi_t in_phi_hw[NPART];
     pt2_t out_pt2_hw;
     phi_t out_phi_hw;
+
+    float in_pt[NPART], in_phi[NPART];
     float out_pt, out_phi;
 
 
     // load the dump file output
+	std::vector<std::vector<std::pair<float,float> > > vals; 
 	if(*dumpfile){
 		// in any case, initialize to zeros
+		vals.resize(NTEST);
+		for(int i=0; i<NTEST; i++){
+			vals[i].resize(NPART);
+		}
 		// load the dump file output
-		FILE *f = fopen(dumpfile, "rb");
+		FILE *f = fopen("/home/jhong/hlsmet/out_TTbar.dump","rb");
 		std::vector<l1tpf_int::PFParticle> pfs;
 
 		uint64_t ie=0;
 		while ( fread(&ie, sizeof(uint64_t), 1, f) && ie<NTEST) {
 			if (ie>2) break;
-            printf("ie? %d\n",ie);
-			//printf("Event %d has %d PF candidates \n", int(ie), int(pfs.size()));
+			readManyFromFile(pfs,f);
+			printf("Event %d has %d PF candidates \n", int(ie), int(pfs.size()));
 			for(size_t ip=0;ip<pfs.size() && ip<NPART;ip++){
-                inputs[ip] = ie;
+				vals[ie][ip] = std::make_pair<float,float>(pfs[ip].hwPt, pfs[ip].hwPhi);
 			}
 		}
-
 		fclose(f);
+
+		//uint64_t ii=0;
+		//char s[32];
+		//char deli[2];
+		//std::string trush;
+
+		//FILE *fi = fopen("/home/jhong/hlsmet/out_TTbar_conv.dump","rb");
+		//while ( fread(&s, 17, 1, fi) && ii<NTEST) {
+		//	std::cout<<"ii "<<ii<<std::endl;
+		//	if (ii>2) break;
+		//	//printf("Event %d has %d PF candidates \n", int(ie), int(pfs.size()));
+		//	for(int clk = 0; clk < 36; clk++){
+		//	for(size_t ip=0; ip<60;ip++){
+        //        fread(&s, 16, 1, fi);
+		//		fread(&deli, 1, 1, fi);
+		//		if( uint64_t(s) == 0) continue;
+		//		std::cout<<"["<<ip+clk*60<<"] "<<s<<std::endl;
+		//		//data[ip+clk] = s;
+		//		//std::cout<<"data["<<ip+clk<<"] "<<data[ip+clk]<<std::endl;
+		//	}}
+		//	ii++;
+		//}
+
+		//fclose(fi);
 	} else {
+		std::cout<<"do random"<<std::endl;
 		//setup random number generator
 		std::default_random_engine generator(1776); // seed
 		std::uniform_real_distribution<float> pt_dist(10.,100.);
@@ -68,33 +96,65 @@ int alg_test(const char* dumpfile="") {
 		}
 	}
     //write results to file
-    FILE *f;
-    f=fopen("results.txt","w");
+    FILE *result;
+    result=fopen("results.txt","w");
+
+	FILE *fi = fopen("/home/jhong/hlsmet/out_TTbar_conv.dump","rb");
+	char s[17];
+	char temp;
 
     for (int i=0; i<NTEST; ++i) {
+		if(i>1) continue;
         if(DEBUG) std::cout << "\n\n\n\nEvent " << i << std::endl;
-        for(int j=0; j<NPART; j++){
-            // convert float to hw units
-            in_pt_hw[j]  = vals[i][j].first * (1<<PT_DEC_BITS); // 0.25 GeV precision
-            in_phi_hw[j] = int(vals[i][j].second * (1<<PHI_SIZE)/(2*FLOATPI));
+		
+		fread(&temp, sizeof(char), 1, fi);
+		for(int clk = 0; clk < 36; clk++){
+			//if(clk != 0) continue;
+		for(int j = 0; j<60; j++){
+				int si = 0;
+				if(DEBUG) std::cout<<"\ndo ";
+			while(1){
+				if(temp == ' '||temp=='\n'){
+					fread(&temp, sizeof(char),1,fi);
+					continue;
+				}
+				if(DEBUG) std::cout<<si<<" ";
+				s[si] = temp;
+				fread(&temp, sizeof(char),1,fi);
+				si++;
+				if(si == 16) { s[si] = '\0'; break;}
+			}
+			if(clk==0)inputs[clk*60+j] = s;
+			std::cout<<"inputs["<<clk*60+j<<"] "<<s<<std::endl;
+
+		}}
+        for(int j=0; j<60; j++){
+            //// convert float to hw units
+            //in_pt_hw[j]  = vals[i][j].first * (1<<PT_DEC_BITS); // 0.25 GeV precision
+            //in_phi_hw[j] = int(vals[i][j].second * (1<<PHI_SIZE)/(2*FLOATPI));
             // keep test vals as float
             in_pt[j]  = vals[i][j].first;
             in_phi[j] = vals[i][j].second;
-            if(DEBUG){
-                std::cout << " \t part pt " << in_pt[j];
-                std::cout << "\t phi " << in_phi[j];
-                std::cout << std::endl;
-            }
+			if(DEBUG){
+				std::cout << " \t part pt " << in_pt[j];
+				std::cout << "\t phi " << in_phi[j];
+				std::cout << std::endl;
+			}
         }
 
         out_pt2_hw=0.; out_phi_hw=0.;
         out_pt=0.; out_phi=0.;
+
+		output_ref = 0; //output = 0;
         
         // run reference alg
-        met_ref(in_pt, in_phi, out_pt, out_phi);
+        //met_ref(inputs_ref, output_ref);
+		met_ref(in_pt, in_phi, out_pt, out_phi);
+		//met_ref(inputs_ref, output_ref);
 
         // run HW alg
         met_hw(inputs, output);
+		//met_hw(in_pt_hw, in_phi_hw, out_pt2_hw, out_phi_hw);
 
 
         if(DEBUG) std::cout << " REF : met(pt = " << out_pt << ", phi = "<< out_phi << ")\n";
@@ -109,10 +169,11 @@ int alg_test(const char* dumpfile="") {
             std::cout << "Event " << i
                       << " (REF vs HW) met " << out_pt << " vs " << out_pt_hw
                       << ", phi "<< out_phi << " vs "<< out_phi_hw_rad << "\n";
-        fprintf(f, "%f %f %f %f \n", out_pt, out_phi, out_pt_hw, out_phi_hw_rad);
+        fprintf(result, "%f %f %f %f \n", out_pt, out_phi, out_pt_hw, out_phi_hw_rad);
         //fprintf(f, "%f %f %f %d \n", out_pt, out_phi, out_pt_hw, out_phi_hw_int);
     }
-    fclose(f);
+	fclose(fi);
+    fclose(result);
 
     return 0;
 }
@@ -240,7 +301,7 @@ int full_alg_test() {
 int main() {
 
     // test the algorithm
-    alg_test("/home/jhong/hlsmet/outdk.dump");
+    alg_test("/home/jhong/hlsmet/out_TTbar_conv.dump");
     //full_alg_test();
 
     return 0;
