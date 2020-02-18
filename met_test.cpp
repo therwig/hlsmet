@@ -44,7 +44,7 @@ int alg_test(const char* dumpfile="") {
 
 		uint64_t ie=0;
 		while ( fread(&ie, sizeof(uint64_t), 1, f) && ie<NTEST) {
-			if (ie>2) break;
+			//if (ie>1000) break;
 			readManyFromFile(pfs,f);
 			printf("Event %d has %d PF candidates \n", int(ie), int(pfs.size()));
 			for(size_t ip=0;ip<pfs.size() && ip<NPART;ip++){
@@ -100,32 +100,39 @@ int alg_test(const char* dumpfile="") {
     result=fopen("results.txt","w");
 
 	FILE *fi = fopen("/home/jhong/hlsmet/out_TTbar_conv.dump","rb");
+	std::string inputs_string[NPART];
 	char s[17];
 	char temp;
+	size_t Length;
 
     for (int i=0; i<NTEST; ++i) {
-		if(i>1) continue;
-        if(DEBUG) std::cout << "\n\n\n\nEvent " << i << std::endl;
+		//if(i>1000) continue;
+        if(1) std::cout << "\n\nEvent " << i << std::endl;
 		
 		fread(&temp, sizeof(char), 1, fi);
 		for(int clk = 0; clk < 36; clk++){
 			//if(clk != 0) continue;
 		for(int j = 0; j<60; j++){
 				int si = 0;
-				if(DEBUG) std::cout<<"\ndo ";
+				if(DEBUG2 && clk==0) std::cout<<"\ndo "; 
+				//if((clk*60+j)%6 == 0) std::cout<<clk*60+j<<" ";
 			while(1){
 				if(temp == ' '||temp=='\n'){
 					fread(&temp, sizeof(char),1,fi);
 					continue;
 				}
-				if(DEBUG) std::cout<<si<<" ";
+				if(DEBUG2 && clk==0) std::cout<<si<<" ";
 				s[si] = temp;
 				fread(&temp, sizeof(char),1,fi);
 				si++;
 				if(si == 16) { s[si] = '\0'; break;}
 			}
-			if(clk==0)inputs[clk*60+j] = s;
-			std::cout<<"inputs["<<clk*60+j<<"] "<<s<<std::endl;
+			if(clk==0){
+				inputs_string[clk*60+j] = s;
+				if(DEBUG2) std::cout<<"\ninputs_string["<<clk*60+j<<"] "<<s<<std::endl;
+				inputs[clk*60+j] = stol(inputs_string[clk*60+j], &Length, 16);
+				if(DEBUG2) std::cout<<"--> inputs["<<clk*60+j<<"] "<<inputs[clk*60+j]<<std::endl;
+			}
 
 		}}
         for(int j=0; j<60; j++){
@@ -153,13 +160,16 @@ int alg_test(const char* dumpfile="") {
 		//met_ref(inputs_ref, output_ref);
 
         // run HW alg
-        met_hw(inputs, output);
+        //met_hw(inputs, output);
+        met_hw(inputs, out_pt2_hw, out_phi_hw);
 		//met_hw(in_pt_hw, in_phi_hw, out_pt2_hw, out_phi_hw);
 
 
         if(DEBUG) std::cout << " REF : met(pt = " << out_pt << ", phi = "<< out_phi << ")\n";
         // for HW alg, convert back to nice units for printing
         int out_phi_hw_int = float(out_phi_hw);
+        //float out_phi_hw_rad = float(out_phi_hw);
+        //float out_pt_hw = sqrt(float(out_pt2_hw));
         float out_phi_hw_rad = float(out_phi_hw) * (2*FLOATPI)/(1<<PHI_SIZE);
         float out_pt_hw = sqrt(float(out_pt2_hw)) / (1<<PT_DEC_BITS); // 0.25GeV to GeV
         if(DEBUG) std::cout << "  HW : met(pt = " << out_pt_hw << ", phi = "<< out_phi_hw_rad << ")\n";

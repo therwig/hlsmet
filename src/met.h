@@ -9,15 +9,15 @@
 #include "hls_math.h"
 
 // For testing
-#define NTEST 2
+#define NTEST 1
 #define NPART 60
 #define FLOATPI 3.141593
 #define DEBUG 1
+#define DEBUG2 1
 
 //
 // Input / Output types
 //
-
 //  pT is uint where 1 bit = 1/4 GeV, up to 4096 (16 bits)
 //    px, py need to be signed
 //    pT^2 needs double precision as pT
@@ -34,15 +34,13 @@ typedef ap_uint<PT2_SIZE> pt2_t;
 #define PHI_SIZE 10
 typedef ap_int<PHI_SIZE> phi_t;
 
-//typedef ap_uint<64> word_t;
-typedef std::string word_t;
-typedef ap_uint<16> var_t;
+// define for word inputs
+typedef ap_uint<64> word_t;
+typedef ap_int<16> var_t;
 // top algs
 void met_ref(float in_pt[NPART], float in_phi[NPART], float& out_pt, float& out_phi);
-//void met_ref(uint64_t inputs[NPART], uint64_t& output);
-//void met_hw(pt_t data_pt[NPART], phi_t data_phi[NPART], pt2_t& res_pt2, phi_t& res_phi);
-void met_hw(word_t inputs[NPART],  word_t& output);
-
+void met_hw(word_t inputs[NPART], pt2_t& res_pt2, phi_t& res_phi);
+//void met_hw(word_t inputs[NPART],  word_t& output);
 
 //
 // Lookup tables for pt projections to X, Y
@@ -146,7 +144,7 @@ template<class pt_T, class phi_T,class pxy_T>
 //   Currently we mitigate, by simply not storing inverses of large numbers, 
 //   but there may be a better way to do this (TODO - study this!)
 //
-#define DROP_BITS 2
+#define DROP_BITS 4
 #define INV_TAB_SIZE (1<<(PT_SIZE-DROP_BITS))
 // return the inverse of a 'pt_size' bits (1024) number
 template<class pt_T>
