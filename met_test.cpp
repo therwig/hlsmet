@@ -48,34 +48,12 @@ int alg_test(const char* dumpfile="") {
 			readManyFromFile(pfs,f);
 			printf("Event %d has %d PF candidates \n", int(ie), int(pfs.size()));
 			for(size_t ip=0;ip<pfs.size() && ip<NPART;ip++){
-				vals[ie][ip] = std::make_pair<float,float>(pfs[ip].hwPt, pfs[ip].hwPhi);
+				vals[ie][ip] = std::make_pair<float,float>(pfs[ip].hwPt/float(1<<PT_DEC_BITS), pfs[ip].hwPhi*(2*FLOATPI)/(1<<PHI_SIZE));
 			}
 		}
 		fclose(f);
 
-		//uint64_t ii=0;
-		//char s[32];
-		//char deli[2];
-		//std::string trush;
 
-		//FILE *fi = fopen("/home/jhong/hlsmet/out_TTbar_conv.dump","rb");
-		//while ( fread(&s, 17, 1, fi) && ii<NTEST) {
-		//	std::cout<<"ii "<<ii<<std::endl;
-		//	if (ii>2) break;
-		//	//printf("Event %d has %d PF candidates \n", int(ie), int(pfs.size()));
-		//	for(int clk = 0; clk < 36; clk++){
-		//	for(size_t ip=0; ip<60;ip++){
-        //        fread(&s, 16, 1, fi);
-		//		fread(&deli, 1, 1, fi);
-		//		if( uint64_t(s) == 0) continue;
-		//		std::cout<<"["<<ip+clk*60<<"] "<<s<<std::endl;
-		//		//data[ip+clk] = s;
-		//		//std::cout<<"data["<<ip+clk<<"] "<<data[ip+clk]<<std::endl;
-		//	}}
-		//	ii++;
-		//}
-
-		//fclose(fi);
 	} else {
 		std::cout<<"do random"<<std::endl;
 		//setup random number generator
@@ -107,11 +85,10 @@ int alg_test(const char* dumpfile="") {
 
     for (int i=0; i<NTEST; ++i) {
 		//if(i>1000) continue;
-        if(1) std::cout << "\n\nEvent " << i << std::endl;
+        if(DEBUG2) std::cout << "\n\nEvent " << i << std::endl;
 		
 		fread(&temp, sizeof(char), 1, fi);
 		for(int clk = 0; clk < 36; clk++){
-			//if(clk != 0) continue;
 		for(int j = 0; j<60; j++){
 				int si = 0;
 				if(DEBUG2 && clk==0) std::cout<<"\ndo "; 
@@ -136,9 +113,6 @@ int alg_test(const char* dumpfile="") {
 
 		}}
         for(int j=0; j<60; j++){
-            //// convert float to hw units
-            //in_pt_hw[j]  = vals[i][j].first * (1<<PT_DEC_BITS); // 0.25 GeV precision
-            //in_phi_hw[j] = int(vals[i][j].second * (1<<PHI_SIZE)/(2*FLOATPI));
             // keep test vals as float
             in_pt[j]  = vals[i][j].first;
             in_phi[j] = vals[i][j].second;
@@ -155,24 +129,19 @@ int alg_test(const char* dumpfile="") {
 		output_ref = 0; //output = 0;
         
         // run reference alg
-        //met_ref(inputs_ref, output_ref);
 		met_ref(in_pt, in_phi, out_pt, out_phi);
-		//met_ref(inputs_ref, output_ref);
 
         // run HW alg
         //met_hw(inputs, output);
         met_hw(inputs, out_pt2_hw, out_phi_hw);
-		//met_hw(in_pt_hw, in_phi_hw, out_pt2_hw, out_phi_hw);
 
 
-        if(DEBUG) std::cout << " REF : met(pt = " << out_pt << ", phi = "<< out_phi << ")\n";
+        if(1) std::cout << " REF : met(pt = " << out_pt << ", phi = "<< out_phi << ")\n";
         // for HW alg, convert back to nice units for printing
         int out_phi_hw_int = float(out_phi_hw);
-        //float out_phi_hw_rad = float(out_phi_hw);
-        //float out_pt_hw = sqrt(float(out_pt2_hw));
         float out_phi_hw_rad = float(out_phi_hw) * (2*FLOATPI)/(1<<PHI_SIZE);
         float out_pt_hw = sqrt(float(out_pt2_hw)) / (1<<PT_DEC_BITS); // 0.25GeV to GeV
-        if(DEBUG) std::cout << "  HW : met(pt = " << out_pt_hw << ", phi = "<< out_phi_hw_rad << ")\n";
+        if(1) std::cout << "  HW : met(pt = " << out_pt_hw << ", phi = "<< out_phi_hw_rad << ")\n";
 
         //if not debugging the full event details, print a compact output (in nice units)
         if(false && !DEBUG && NTEST<=100)

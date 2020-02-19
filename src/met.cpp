@@ -18,29 +18,22 @@ void met_hw(word_t inputs[NPART],  pt2_t& res_pt2, phi_t& res_phi){
     
     if(DEBUG) std::cout << "  HW Begin" << std::endl;
 
-	//std::string words[NPART];
-	//std::string words_ptphi[2][NPART];
-	//int temp_pt[NPART], temp_phi[NPART];
-	var_t data_pt[NPART]; var_t data_phi[NPART];  //var_t is ap_int<16>
+	var_t temp_pt[NPART]; var_t temp_phi[NPART];  //var_t is ap_int<16>
+	pt_t data_pt[NPART]; phi_t data_phi[NPART];  //var_t is ap_int<16>
 	size_t Length;
 	for(int i = 0; i < 60; i++){
 		data_pt[i]  = inputs[i](63,48);
 		data_phi[i] = inputs[i](47,32);
-		//words[i] = inputs[i];
-		//words_ptphi[0][i] = words[i].substr(0,4);
-		//words_ptphi[1][i] = words[i].substr(4,4);
+		//temp_pt[i]  = inputs[i](63,48);
+		//temp_phi[i] = inputs[i](47,32);
 
-		if(DEBUG2) std::cout<<"word pt phi: "<<data_pt[i]<<" "<<data_phi[i]<<std::endl;
+		//data_pt[i] = temp_pt[i];
+		//data_phi[i] = temp_phi[i];
+
+		if(DEBUG) std::cout<<"word pt phi: "<<data_pt[i]<<" "<<data_phi[i]<<std::endl;
 
 		//if(data_pt[i]==0 && data_phi[i]==0) continue;
-
-		//temp_pt[i]  = stoi(words_ptphi[0][i], &Length, 16); if(temp_pt[i]  >(1<<15)) temp_pt[i]  = temp_pt[i] - (1<<16);
-		//temp_phi[i] = stoi(words_ptphi[1][i], &Length, 16); if(temp_phi[i] >(1<<15)) temp_phi[i] = temp_phi[i] - (1<<16);
-
-		//data_pt[i] = temp_pt[i] * (1<<2); // PT_DEC_BITS 0.25 GeV precision
-		//data_phi[i] = int(temp_phi[i] * (1<<PHI_SIZE)/(2*FLOATPI));
 	}
-	//pt2_t res_pt2;
 
     // calc signed components first
     pxy_t met_x = 0;
@@ -61,12 +54,14 @@ void met_hw(word_t inputs[NPART],  pt2_t& res_pt2, phi_t& res_phi){
          }
     }
 
+	//pt2_t res_pt2;
     res_pt2 = sum_x*sum_x + sum_y*sum_y;
 
 	//pt_t res_pt; phi_t res_phi;
     PhiFromXY(sum_x,sum_y,res_pt2,res_phi);
 
     //res_pt = hls::sqrt(res_pt2);
+
     // pack outputs into a single word
     //output = 0 + (0<<16) + (res_phi<<32) + (res_pt<<48);
 
