@@ -132,15 +132,25 @@ int alg_test(const char* dumpfile="") {
 		met_ref(in_pt, in_phi, out_pt, out_phi);
 
         // run HW alg
-        //met_hw(inputs, output);
-        met_hw(inputs, out_pt2_hw, out_phi_hw);
+        met_hw(inputs, output);
+        //met_hw(inputs, out_pt2_hw, out_phi_hw);
 
+		if(DEBUG) std::cout<< "output "<<output<<std::endl;
+		int16_t val_pt_hw;
+		int16_t val_phi_hw;
+		val_pt_hw = output(63,48);
+		val_phi_hw = output(47,32);
+
+		if(DEBUG) std::cout << " val_pt & phi_hw : "<<val_pt_hw<<", "<<val_phi_hw<<std::endl;
 
         if(1) std::cout << " REF : met(pt = " << out_pt << ", phi = "<< out_phi << ")\n";
         // for HW alg, convert back to nice units for printing
-        int out_phi_hw_int = float(out_phi_hw);
-        float out_phi_hw_rad = float(out_phi_hw) * (2*FLOATPI)/(1<<PHI_SIZE);
-        float out_pt_hw = sqrt(float(out_pt2_hw)) / (1<<PT_DEC_BITS); // 0.25GeV to GeV
+        int out_phi_hw_int = float(val_phi_hw);
+        float out_phi_hw_rad = float(val_phi_hw) * (2*FLOATPI)/(1<<PHI_SIZE);
+        float out_pt_hw = float(val_pt_hw) / (1<<PT_DEC_BITS); // 0.25GeV to GeV
+        //int out_phi_hw_int = float(out_phi_hw);
+        //float out_phi_hw_rad = float(out_phi_hw) * (2*FLOATPI)/(1<<PHI_SIZE);
+        //float out_pt_hw = sqrt(float(out_pt2_hw)) / (1<<PT_DEC_BITS); // 0.25GeV to GeV
         if(1) std::cout << "  HW : met(pt = " << out_pt_hw << ", phi = "<< out_phi_hw_rad << ")\n";
 
         //if not debugging the full event details, print a compact output (in nice units)
