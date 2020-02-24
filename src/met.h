@@ -9,11 +9,11 @@
 #include "hls_math.h"
 
 // For testing
-#define NTEST 1
+#define NTEST 10000
 #define NPART 60
 #define FLOATPI 3.141593
-#define DEBUG 1
-#define DEBUG2 1
+#define DEBUG 0
+#define DEBUG2 0
 
 //
 // Input / Output types
@@ -39,8 +39,8 @@ typedef ap_uint<64> word_t;
 typedef ap_int<16> var_t;
 // top algs
 void met_ref(float in_pt[NPART], float in_phi[NPART], float& out_pt, float& out_phi);
-void met_hw(word_t inputs[NPART], pt2_t& res_pt2, phi_t& res_phi);
-//void met_hw(word_t inputs[NPART],  word_t& output);
+//void met_hw(word_t inputs[NPART], pt2_t& res_pt2, phi_t& res_phi);
+void met_hw(word_t inputs[NPART],  word_t& output);
 
 //
 // Lookup tables for pt projections to X, Y
@@ -183,7 +183,7 @@ void init_acos_table(phi_T table_out[ACOS_TAB_SIZE]){
         /*     table_out[INDEX] = acos(2*((ACOS_TAB_SIZE-1)-i)/float(ACOS_TAB_SIZE)-1); */
         /*     INDEX++; */
         /* } */
-    std::cout << "initializing acos table \n";
+    if(DEBUG) std::cout << "initializing acos table \n";
     for(int i = 0; i<ACOS_TAB_SIZE; i++){
         table_out[i] = (1<<(PHI_SIZE-2)) * acos(i/float(ACOS_TAB_SIZE-1)) / (FLOATPI/2); // maps [0, 1023] to [acos(0), acos(1023/1023)] *** 3.1415/2
         if(0) std::cout << "  " << i << " -> " << table_out[i] << std::endl;
