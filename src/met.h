@@ -40,7 +40,7 @@ typedef ap_int<16> var_t;
 // top algs
 void met_ref(float in_pt[NPART], float in_phi[NPART], float& out_pt, float& out_phi);
 //void met_hw(word_t inputs[NPART], pt2_t& res_pt2, phi_t& res_phi);
-void met_hw(word_t inputs[NPART],  word_t& output);
+void met_hw(word_t inputs[NPART],  word_t &output);
 
 //
 // Lookup tables for pt projections to X, Y
