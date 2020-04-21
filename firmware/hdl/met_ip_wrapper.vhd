@@ -13,7 +13,7 @@ entity met_ip_wrapper is
     done: out std_logic;
     idle: out std_logic;
     ready: out std_logic;
-    output : out met_data(1 downto 0)
+    output : out met_data(0 downto 0)
     );
 
 end met_ip_wrapper;
@@ -22,7 +22,7 @@ architecture rtl of met_ip_wrapper is
 
 begin
 
-  met_algo : entity work.met_hw_0
+  met_algo : entity work.met_hw
     port map (
       ap_clk => clk,
       ap_rst => rst,

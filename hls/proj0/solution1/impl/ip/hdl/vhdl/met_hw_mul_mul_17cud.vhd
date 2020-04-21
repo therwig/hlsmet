@@ -3,7 +3,7 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 
-entity met_hw_mul_mul_17s_17s_32_1_1_DSP48_1 is
+entity met_hw_mul_mul_17cud_DSP48_1 is
 port (
     a: in std_logic_vector(17 - 1 downto 0);
     b: in std_logic_vector(17 - 1 downto 0);
@@ -11,7 +11,7 @@ port (
 
 end entity;
 
-architecture behav of met_hw_mul_mul_17s_17s_32_1_1_DSP48_1 is
+architecture behav of met_hw_mul_mul_17cud_DSP48_1 is
     signal a_cvt: signed(17 - 1 downto 0);
     signal b_cvt: signed(17 - 1 downto 0);
     signal p_cvt: signed(32 - 1 downto 0);
@@ -28,7 +28,7 @@ end architecture;
 Library IEEE;
 use IEEE.std_logic_1164.all;
 
-entity met_hw_mul_mul_17s_17s_32_1_1 is
+entity met_hw_mul_mul_17cud is
     generic (
         ID : INTEGER;
         NUM_STAGE : INTEGER;
@@ -41,8 +41,8 @@ entity met_hw_mul_mul_17s_17s_32_1_1 is
         dout : OUT STD_LOGIC_VECTOR(dout_WIDTH - 1 DOWNTO 0));
 end entity;
 
-architecture arch of met_hw_mul_mul_17s_17s_32_1_1 is
-    component met_hw_mul_mul_17s_17s_32_1_1_DSP48_1 is
+architecture arch of met_hw_mul_mul_17cud is
+    component met_hw_mul_mul_17cud_DSP48_1 is
         port (
             a : IN STD_LOGIC_VECTOR;
             b : IN STD_LOGIC_VECTOR;
@@ -52,7 +52,7 @@ architecture arch of met_hw_mul_mul_17s_17s_32_1_1 is
 
 
 begin
-    met_hw_mul_mul_17s_17s_32_1_1_DSP48_1_U :  component met_hw_mul_mul_17s_17s_32_1_1_DSP48_1
+    met_hw_mul_mul_17cud_DSP48_1_U :  component met_hw_mul_mul_17cud_DSP48_1
     port map (
         a => din0,
         b => din1,

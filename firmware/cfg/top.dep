@@ -1,6 +1,6 @@
 src emp_payload.vhd
-addrtab -c emp-fwk:components/payload emp_payload.xml
-src -c emp-fwk:components/payload ../ucf/emp_simple_payload.tcl
-include -c test_apr10_met1in:hlsmet emp_met_wrapper.dep
-include -c emp-fwk:boards/vcu118
+include emp_met_wrapper.dep
+include hls.dep
+include -c emp-fwk:boards/vcu118 vcu118.dep
 src emp_project_decl.vhd
+setup -f vhdl2008.tcl
