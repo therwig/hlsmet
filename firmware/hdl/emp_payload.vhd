@@ -53,8 +53,8 @@ begin
   end generate;
 
   -- Pipe the input for SLR crossings
-  dmet(IN_BUFFER_LEN-1 downto 1) <= dmet(IN_BUFFER_LEN-2 downto 0) when rising_edge(clk);
-  qmet(OUT_BUFFER_LEN-1 downto 1) <= qmet(OUT_BUFFER_LEN-2 downto 0) when rising_edge(clk);
+  dmet(IN_BUFFER_LEN-1 downto 1) <= dmet(IN_BUFFER_LEN-2 downto 0) when rising_edge(clk_p);
+  qmet(OUT_BUFFER_LEN-1 downto 1) <= qmet(OUT_BUFFER_LEN-2 downto 0) when rising_edge(clk_p);
   
   met_algo : entity work.met_ip_wrapper
     PORT MAP (
@@ -69,7 +69,10 @@ begin
       );
 
   --qmet(0) => q(0).data;
-  qmet(OUT_BUFFER_LEN-1)(0) <= q(0).data;
+  q(0).data   <= qmet(OUT_BUFFER_LEN-1)(0);
+  q(0).valid  <= '1';
+  q(0).strobe <= '1';
+  q(4 * N_REGION - 1 downto 1) <= (others => lword_null);
   
   bc0 <= '0';
   
