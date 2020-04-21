@@ -60,7 +60,7 @@ begin
       idle => open,
       ready => open,
       input => dmet(0),
-      output => qmet(0)
+      output => qmet
       );
 
   --qmet(0) => q(0).data;

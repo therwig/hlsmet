@@ -22,7 +22,7 @@ architecture rtl of met_ip_wrapper is
 
 begin
 
-  met_algo : entity work.met_hw_0
+  met_algo : entity work.met_hw
     port map (
       ap_clk => clk,
       ap_rst => rst,
