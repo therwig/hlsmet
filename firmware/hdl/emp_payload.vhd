@@ -36,11 +36,12 @@ end emp_payload;
 
 architecture rtl of emp_payload is
   
-  constant PAYLOAD_LATENCY : integer := 36;
+  constant IN_BUFFER_LEN : integer := 6;
+  constant OUT_BUFFER_LEN : integer := 6;
 --  type dmet_t is array(PAYLOAD_LATENCY-1 downto 0) of met_data(N_MET_INPUTS-1 downto 0);
   --signal dmet: array(PAYLOAD_LATENCY-1 downto 0) of met_data(N_MET_INPUTS-1 downto 0);
-  signal dmet: met_data_array(PAYLOAD_LATENCY-1 downto 0)(N_MET_INPUTS-1 downto 0);
-  signal qmet: met_data(1 downto 0);
+  signal dmet: met_data_array(IN_BUFFER_LEN-1 downto 0)(N_MET_INPUTS-1 downto 0);
+  signal qmet: met_data_array(OUT_BUFFER_LEN-1 downto 0)(0 downto 0);
 begin
 
   ipb_out <= IPB_RBUS_NULL;
@@ -50,6 +51,10 @@ begin
   begin
     dmet(0)(i) <= d(i).data;
   end generate;
+
+  -- Pipe the input for SLR crossings
+  dmet(IN_BUFFER_LEN-1 downto 1) <= dmet(IN_BUFFER_LEN-2 downto 0) when rising_edge(clk);
+  qmet(OUT_BUFFER_LEN-1 downto 1) <= qmet(OUT_BUFFER_LEN-2 downto 0) when rising_edge(clk);
   
   met_algo : entity work.met_ip_wrapper
     PORT MAP (
@@ -59,12 +64,12 @@ begin
       done => open,
       idle => open,
       ready => open,
-      input => dmet(0),
-      output => qmet
+      input => dmet(IN_BUFFER_LEN-1),
+      output => qmet(0)
       );
 
   --qmet(0) => q(0).data;
-  qmet(0) <= q(0).data;
+  qmet(OUT_BUFFER_LEN-1)(0) <= q(0).data;
   
   bc0 <= '0';
   

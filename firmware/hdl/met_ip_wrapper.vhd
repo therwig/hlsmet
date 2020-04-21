@@ -13,7 +13,7 @@ entity met_ip_wrapper is
     done: out std_logic;
     idle: out std_logic;
     ready: out std_logic;
-    output : out met_data(1 downto 0)
+    output : out met_data(0 downto 0)
     );
 
 end met_ip_wrapper;
