@@ -17,7 +17,6 @@ int alg_test(const char* dumpfile="") {
 
     // calculate met for NPART particles
     word_t inputs[NPART];
-    //word_t output;
     word_t output;
     float inputs_ref[NPART];
     float output_ref;
@@ -40,8 +39,8 @@ int alg_test(const char* dumpfile="") {
             vals[i].resize(NPART);
         }
         // load the dump file output
-        //FILE *f = fopen("/home/jhong/hlsmet/out_TTbar.dump","rb");
-        FILE *f = fopen("/data/therwig/public/out_TTbar_conv.dump","rb");
+        FILE *f = fopen("/home/jhong/hlsmet_temp/out_TTbar.dump","rb");
+        //FILE *f = fopen("/data/therwig/public/out_TTbar_conv.dump","rb");
         std::vector<l1tpf_int::PFParticle> pfs;
 
         uint64_t ie=0;
@@ -79,8 +78,8 @@ int alg_test(const char* dumpfile="") {
     FILE *result;
     result=fopen("results.txt","w");
 
-    FILE *fi = fopen("/data/therwig/public/out_TTbar_conv.dump","rb");
-    //FILE *fi = fopen("/home/jhong/hlsmet/out_TTbar_conv.dump","rb");
+    //FILE *fi = fopen("/data/therwig/public/out_TTbar_conv.dump","rb");
+    FILE *fi = fopen("/home/jhong/hlsmet/out_TTbar_54.dump","rb");
     std::string inputs_string[NPART];
     char s[17];
     char temp;
@@ -92,30 +91,30 @@ int alg_test(const char* dumpfile="") {
 		
         fread(&temp, sizeof(char), 1, fi);
         for(int clk = 0; clk < 36; clk++){
-            for(int j = 0; j<60; j++){
+            for(int j = 0; j<NPART; j++){
                 int si = 0;
-                if(DEBUG2 && clk==0) std::cout<<"\ndo "; 
+                if(DEBUG2 && clk==0 && false) std::cout<<"\ndo "; 
                 //if((clk*60+j)%6 == 0) std::cout<<clk*60+j<<" ";
                 while(1){
                     if(temp == ' '||temp=='\n'){
                         fread(&temp, sizeof(char),1,fi);
                         continue;
                     }
-                    if(DEBUG2 && clk==0) std::cout<<si<<" ";
+                    if(DEBUG2 && clk==0 && false) std::cout<<si<<" ";
                     s[si] = temp;
                     fread(&temp, sizeof(char),1,fi);
                     si++;
                     if(si == 16) { s[si] = '\0'; break;}
                 }
                 if(clk==0){
-                    inputs_string[clk*60+j] = s;
-                    if(DEBUG2) std::cout<<"\ninputs_string["<<clk*60+j<<"] "<<s<<std::endl;
-                    inputs[clk*60+j] = stol(inputs_string[clk*60+j], &Length, 16);
-                    if(DEBUG2) std::cout<<"--> inputs["<<clk*60+j<<"] "<<inputs[clk*60+j]<<std::endl;
+                    inputs_string[clk*NPART+j] = s;
+                    if(DEBUG2 && (clk*NPART+j == 0 || clk*NPART+j == 1)) std::cout<<"\ninputs_string["<<clk*NPART+j<<"] "<<s<<std::endl;
+                    inputs[clk*NPART+j] = stol(inputs_string[clk*NPART+j], &Length, 16);
+                    if(DEBUG2 && (clk*NPART+j == 0 || clk*NPART+j == 1)) std::cout<<"--> inputs["<<clk*NPART+j<<"] "<<inputs[clk*NPART+j]<<std::endl;
                 }
 
             }}
-        for(int j=0; j<60; j++){
+        for(int j=0; j<NPART; j++){
             // keep test vals as float
             in_pt[j]  = vals[i][j].first;
             in_phi[j] = vals[i][j].second;
@@ -145,6 +144,7 @@ int alg_test(const char* dumpfile="") {
         val_phi_hw = output(47,32);
 
         if(DEBUG) std::cout << " val_pt & phi_hw : "<<val_pt_hw<<", "<<val_phi_hw<<std::endl;
+		if(DEBUG) printf("%04X%04X%04X%04X\n",uint16_t(val_pt_hw),uint16_t(val_phi_hw),uint16_t(output(31,16)),uint16_t(output(15,0)));
 
         if(1) std::cout << " REF : met(pt = " << out_pt << ", phi = "<< out_phi << ")\n";
         // for HW alg, convert back to nice units for printing
@@ -293,7 +293,7 @@ int full_alg_test() {
 int main() {
 
     // test the algorithm
-    alg_test("/home/jhong/hlsmet/out_TTbar_conv.dump");
+    alg_test("/home/jhong/hlsmet/out_TTbar_54.dump");
     //full_alg_test();
 
     return 0;
