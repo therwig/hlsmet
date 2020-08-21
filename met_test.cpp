@@ -39,7 +39,7 @@ int alg_test(const char* dumpfile="") {
             vals[i].resize(NPART);
         }
         // load the dump file output
-        FILE *f = fopen("/home/jhong/hlsmet_temp/out_TTbar.dump","rb");
+        FILE *f = fopen("/home/jhong/inputFiles/out_TTbar.dump","rb");
         //FILE *f = fopen("/data/therwig/public/out_TTbar_conv.dump","rb");
         std::vector<l1tpf_int::PFParticle> pfs;
 
@@ -78,8 +78,7 @@ int alg_test(const char* dumpfile="") {
     FILE *result;
     result=fopen("results.txt","w");
 
-    //FILE *fi = fopen("/data/therwig/public/out_TTbar_conv.dump","rb");
-    FILE *fi = fopen("/home/jhong/hlsmet/out_TTbar_54.dump","rb");
+    FILE *fi = fopen("/home/jhong/temp/hlsmet/TTbar_1evt_54lnk.dump","rb");
     std::string inputs_string[NPART];
     char s[17];
     char temp;
@@ -116,9 +115,17 @@ int alg_test(const char* dumpfile="") {
             }}
         for(int j=0; j<NPART; j++){
             // keep test vals as float
-            in_pt[j]  = vals[i][j].first;
-            in_phi[j] = vals[i][j].second;
+            //in_pt[j]  = vals[i][j].first;
+            //in_phi[j] = vals[i][j].second;
+			// for using converted input files
+			in_pt[j]  = inputs[j](63,48) > (1<<16) ? inputs[j](63,48) - (1<<16) : inputs[j](63,48);
+			in_phi[j] = inputs[j](47,32) > (1<<16) ? inputs[j](47,32) - (1<<16) : inputs[j](47,32);
+
+			in_pt[j]  = in_pt[j] / (1<<PT_DEC_BITS);
+			in_phi[j] = in_phi[j] * (2*FLOATPI)/(1<<PHI_SIZE);
+			
             if(DEBUG){
+				std::cout << " \t inputs[j](47,32)" << inputs[j](47,32);
                 std::cout << " \t part pt " << in_pt[j];
                 std::cout << "\t phi " << in_phi[j];
                 std::cout << std::endl;

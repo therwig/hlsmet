@@ -12,9 +12,10 @@
 // pt, phi are integers
 //void met_hw(word_t inputs[NPART],  pt2_t& res_pt2, phi_t& res_phi){
 void met_hw(word_t inputs[NPART],  word_t &output){
+//#pragma HLS dataflow
+#pragma HLS pipeline ii=36
 #pragma HLS ARRAY_PARTITION variable=inputs complete
 #pragma HLS INTERFACE ap_none port=output
-#pragma HLS pipeline ii=36
     
     if(DEBUG) std::cout << "  HW Begin" << std::endl;
 
@@ -42,6 +43,8 @@ void met_hw(word_t inputs[NPART],  word_t &output){
     pxy_t met_y = 0;
     pxy_t sum_x = 0;
     pxy_t sum_y = 0;
+
+
  LOOP_COMPONENTS: for(int i=0; i<NPART;i++){
         // Get x, y components
         ProjX(data_pt[i], data_phi[i], met_x);
