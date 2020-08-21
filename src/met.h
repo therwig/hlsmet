@@ -8,12 +8,11 @@
 #include "ap_fixed.h"
 #include "hls_math.h"
 
-// For testing
-#define NTEST 10000
-#define NPART 60
+#define NTEST 1
+#define NPART 1
 #define FLOATPI 3.141593
-#define DEBUG 0
-#define DEBUG2 0
+#define DEBUG 1
+#define DEBUG2 1
 
 //
 // Input / Output types
@@ -194,7 +193,6 @@ void init_acos_table(phi_T table_out[ACOS_TAB_SIZE]){
 template<class pxy_T, class phi_T, class pt2_T>
 //template<class pxy_T, class pxy_T, class phi_T>
     void PhiFromXY(pxy_T px, pxy_T py, pt2_T pt2, phi_T &phi){
-
     // Initialize the lookup tables
 #ifdef __HLS_SYN__
     bool initialized = false;
