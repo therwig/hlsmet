@@ -29,56 +29,56 @@ int alg_test(const char* dumpfile="") {
     float in_pt[NPART], in_phi[NPART];
     float out_pt, out_phi;
 
+    // // load the dump file output
+    // std::vector<std::vector<std::pair<float,float> > > vals; 
+    // if(*dumpfile){
+    //     // in any case, initialize to zeros
+    //     vals.resize(NTEST);
+    //     for(int i=0; i<NTEST; i++){
+    //         vals[i].resize(NPART);
+    //     }
+    //     // load the dump file output
+    //     FILE *f = fopen("out_TTbar.dump","rb");
+    //     //FILE *f = fopen("/data/therwig/public/out_TTbar_conv.dump","rb");
+    //     std::vector<l1tpf_int::PFParticle> pfs;
 
-    // load the dump file output
-    std::vector<std::vector<std::pair<float,float> > > vals; 
-    if(*dumpfile){
-        // in any case, initialize to zeros
-        vals.resize(NTEST);
-        for(int i=0; i<NTEST; i++){
-            vals[i].resize(NPART);
-        }
-        // load the dump file output
-        FILE *f = fopen("/home/jhong/inputFiles/out_TTbar.dump","rb");
-        //FILE *f = fopen("/data/therwig/public/out_TTbar_conv.dump","rb");
-        std::vector<l1tpf_int::PFParticle> pfs;
-
-        uint64_t ie=0;
-        while ( fread(&ie, sizeof(uint64_t), 1, f) && ie<NTEST) {
-            //if (ie>1000) break;
-            readManyFromFile(pfs,f);
-            printf("Event %d has %d PF candidates \n", int(ie), int(pfs.size()));
-            for(size_t ip=0;ip<pfs.size() && ip<NPART;ip++){
-                vals[ie][ip] = std::make_pair<float,float>(pfs[ip].hwPt/float(1<<PT_DEC_BITS), pfs[ip].hwPhi*(2*FLOATPI)/(1<<PHI_SIZE));
-            }
-        }
-        fclose(f);
+    //     uint64_t ie=0;
+    //     while ( fread(&ie, sizeof(uint64_t), 1, f) && ie<NTEST) {
+    //         //if (ie>1000) break;
+    //         readManyFromFile(pfs,f);
+    //         printf("Event %d has %d PF candidates \n", int(ie), int(pfs.size()));
+    //         for(size_t ip=0;ip<pfs.size() && ip<NPART;ip++){
+    //             vals[ie][ip] = std::make_pair<float,float>(pfs[ip].hwPt/float(1<<PT_DEC_BITS), pfs[ip].hwPhi*(2*FLOATPI)/(1<<PHI_SIZE));
+    //         }
+    //     }
+    //     fclose(f);
 
 
-    } else {
-        std::cout<<"do random"<<std::endl;
-        //setup random number generator
-        std::default_random_engine generator(1776); // seed
-        std::uniform_real_distribution<float> pt_dist(10.,100.);
-        // random pt uniformly distributed between 10 and 100 GeV for each particle
-        std::uniform_real_distribution<float> phi_dist(-FLOATPI,FLOATPI);
-        // random uniform phi
-        // Dimensions: #events=NTEST x #particles=NPART
-        // type is a pair: (pt,phi)
-        vals.resize(NTEST);
-        for(int i=0; i<NTEST; i++){
-            vals[i].resize(NPART);
-            for(int j=0; j<NPART; j++){
-                vals[i][j].first  = pt_dist(generator);
-                vals[i][j].second = phi_dist(generator);
-            }
-        }
-    }
+    // } else {
+    //     std::cout<<"do random"<<std::endl;
+    //     //setup random number generator
+    //     std::default_random_engine generator(1776); // seed
+    //     std::uniform_real_distribution<float> pt_dist(10.,100.);
+    //     // random pt uniformly distributed between 10 and 100 GeV for each particle
+    //     std::uniform_real_distribution<float> phi_dist(-FLOATPI,FLOATPI);
+    //     // random uniform phi
+    //     // Dimensions: #events=NTEST x #particles=NPART
+    //     // type is a pair: (pt,phi)
+    //     vals.resize(NTEST);
+    //     for(int i=0; i<NTEST; i++){
+    //         vals[i].resize(NPART);
+    //         for(int j=0; j<NPART; j++){
+    //             vals[i][j].first  = pt_dist(generator);
+    //             vals[i][j].second = phi_dist(generator);
+    //         }
+    //     }
+    // }
+
     //write results to file
     FILE *result;
-    result=fopen("results.txt","w");
+    result=fopen("../../../../results.txt","w");
 
-    FILE *fi = fopen("/home/jhong/temp/hlsmet/TTbar_1evt_54lnk.dump","rb");
+    FILE *fi = fopen("../../../../TTbar_1evt_54lnk.dump","rb");
     std::string inputs_string[NPART];
     char s[17];
     char temp;
@@ -125,7 +125,7 @@ int alg_test(const char* dumpfile="") {
 			in_phi[j] = in_phi[j] * (2*FLOATPI)/(1<<PHI_SIZE);
 			
             if(DEBUG){
-				std::cout << " \t inputs[j](47,32)" << inputs[j](47,32);
+                std::cout << " \t inputs[j](47,32)" << inputs[j](47,32);
                 std::cout << " \t part pt " << in_pt[j];
                 std::cout << "\t phi " << in_phi[j];
                 std::cout << std::endl;
@@ -300,7 +300,7 @@ int full_alg_test() {
 int main() {
 
     // test the algorithm
-    alg_test("/home/jhong/hlsmet/out_TTbar_54.dump");
+    alg_test("");
     //full_alg_test();
 
     return 0;
