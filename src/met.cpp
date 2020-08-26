@@ -11,20 +11,25 @@
 
 // pt, phi are integers
 //void met_hw(word_t inputs[NPART],  pt2_t& res_pt2, phi_t& res_phi){
-void met_hw(word_t inputs[NPART],  word_t &output){
+//void met_hw(word_t inputs[NPART],  word_t &output){
+void met_hw(hls::stream<PFInputWords> &inputs, hls::stream<word_t> &output){
 //#pragma HLS dataflow
 #pragma HLS pipeline ii=36
-#pragma HLS ARRAY_PARTITION variable=inputs complete
-#pragma HLS INTERFACE ap_none port=output
-    
+    //#pragma HLS ARRAY_PARTITION variable=inputs complete
+
     if(DEBUG) std::cout << "  HW Begin" << std::endl;
 
     var_t temp_pt[NPART]; var_t temp_phi[NPART];  //var_t is ap_int<16>
     pt_t data_pt[NPART]; phi_t data_phi[NPART];  //var_t is ap_int<16>
     size_t Length;
+
+    PFInputWords input_array = inputs.read();
+    
     for(int i = 0; i < NPART; i++){
-        data_pt[i]  = inputs[i](63,48);
-        data_phi[i] = inputs[i](47,32);
+        data_pt[i]  = input_array.data[i](63,48);
+        data_phi[i] = input_array.data[i](47,32);
+        // data_pt[i]  = inputs[i](63,48);
+        // data_phi[i] = inputs[i](47,32);
         //temp_pt[i]  = inputs[i](63,48);
         //temp_phi[i] = inputs[i](47,32);
 
@@ -78,7 +83,8 @@ void met_hw(word_t inputs[NPART],  word_t &output){
     var2_phi = var_phi;
     var2_pt = var_pt;
     if(DEBUG) std::cout<<"var2_pt & phi : "<<var2_pt<<", "<<var2_phi<<std::endl;
-    output = 0 + (0<<16) + (var2_phi<<32) + (var2_pt<<48);
+    output.write( word_t(0 + (0<<16) + (var2_phi<<32) + (var2_pt<<48)) );
+    //output = 0 + (0<<16) + (var2_phi<<32) + (var2_pt<<48);
     //output = 0 + (0<<16) + (res_phi<<32) + (res_pt<<48);
 
     return;

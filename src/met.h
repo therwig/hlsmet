@@ -7,9 +7,10 @@
 #include "ap_int.h"
 #include "ap_fixed.h"
 #include "hls_math.h"
+#include "hls_stream.h"
 
 #define NTEST 1
-#define NPART 1
+#define NPART 54
 #define FLOATPI 3.141593
 #define DEBUG 1
 #define DEBUG2 1
@@ -36,10 +37,12 @@ typedef ap_int<PHI_SIZE> phi_t;
 // define for word inputs
 typedef ap_uint<64> word_t;
 typedef ap_int<16> var_t;
+typedef struct { word_t data[NPART];} PFInputWords;
 // top algs
 void met_ref(float in_pt[NPART], float in_phi[NPART], float& out_pt, float& out_phi);
 //void met_hw(word_t inputs[NPART], pt2_t& res_pt2, phi_t& res_phi);
-void met_hw(word_t inputs[NPART],  word_t &output);
+//void met_hw_old(word_t inputs[NPART],  word_t &output);
+void met_hw(hls::stream<PFInputWords> &inputs, hls::stream<word_t> &output);
 
 //
 // Lookup tables for pt projections to X, Y
