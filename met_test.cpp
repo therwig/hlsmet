@@ -56,8 +56,12 @@ int alg_test(const char* dumpfile="") {
         // pack words into stream
         hls::stream<PFInputWords> input_stream;
         PFInputWords input_array;
-        for(int j=0; j<NPART; j++){
-            input_array.data[j] = word_list[i][j];
+        for(int j=0; j<NPART; j++){            
+            //input_array.data[j] = word_list[i][j];
+            input_array.data[j % NLINKSIN] = word_list[i][j];
+            if(j % NLINKSIN == NLINKSIN-1){
+                input_stream.write(input_array);
+            }
             // ref pt
             in_pt[j] = word_list[i][j](63,48);
             if(in_pt[j] > (1<<16)) in_pt[j] = in_pt[j] - (1<<16);
@@ -65,9 +69,9 @@ int alg_test(const char* dumpfile="") {
             // ref phi
             in_phi[j] = word_list[i][j](47,32);
             if(in_phi[j] > (1<<16)) in_phi[j] = in_phi[j] - (1<<16);
-            in_phi[j] = in_phi[j] * (2*FLOATPI)/(1<<PHI_SIZE);
+            in_phi[j] = in_phi[j] * (2*M_PI)/(1<<PHI_SIZE);
         }
-        input_stream.write(input_array);
+        //input_stream.write(input_array);
         // run HW alg
         hls::stream<word_t> output_stream;
         met_hw(input_stream, output_stream);
@@ -91,7 +95,7 @@ int alg_test(const char* dumpfile="") {
         if(1) std::cout << " REF : met(pt = " << out_pt << ", phi = "<< out_phi << ")\n";
         // for HW alg, convert back to nice units for printing
         int out_phi_hw_int = float(val_phi_hw);
-        float out_phi_hw_rad = float(val_phi_hw) * (2*FLOATPI)/(1<<PHI_SIZE);
+        float out_phi_hw_rad = float(val_phi_hw) * (2*M_PI)/(1<<PHI_SIZE);
         float out_pt_hw = float(val_pt_hw) / (1<<PT_DEC_BITS); // 0.25GeV to GeV
         if(1) std::cout << "  HW : met(pt = " << out_pt_hw << ", phi = "<< out_phi_hw_rad << ")\n";
 
@@ -124,7 +128,7 @@ int full_alg_test() {
     //setup random
     std::default_random_engine generator(1776); // seed
     std::uniform_real_distribution<float> pt_dist(10.,100.);
-    std::uniform_real_distribution<float> phi_dist(-FLOATPI,FLOATPI);
+    std::uniform_real_distribution<float> phi_dist(-M_PI,M_PI);
 
     //fill test data
     std::vector<std::vector<std::pair<float,float> > > vals;
@@ -150,7 +154,7 @@ int full_alg_test() {
         for(int j=0; j<NPART; j++){
             // convert float to hw
             in_pt_hw[j]  = std::round(vals[i][j].first * (1<<PT_DEC_BITS)); // 0.25 GeV precision
-            in_phi_hw[j] = std::round(vals[i][j].second * (1<<PHI_SIZE)/(2*FLOATPI));
+            in_phi_hw[j] = std::round(vals[i][j].second * (1<<PHI_SIZE)/(2*M_PI));
             // keep test vals as float
             in_pt[j]  = vals[i][j].first;
             in_phi[j] = vals[i][j].second;
@@ -199,7 +203,7 @@ int full_alg_test() {
         // end calc, perform some reformatting for output tests
         //
 
-        float out_phi_hw_rad = float(out_phi_hw) * (2*FLOATPI)/(1<<PHI_SIZE); // int to radians
+        float out_phi_hw_rad = float(out_phi_hw) * (2*M_PI)/(1<<PHI_SIZE); // int to radians
         float out_pt_hw = sqrt(float(out_pt2_hw)) / (1<<PT_DEC_BITS); // 0.25GeV to GeV
         float float_hw_sum_x = float(hw_sum_x) / (1<<PT_DEC_BITS); // 0.25GeV to GeV
         float float_hw_sum_y = float(hw_sum_y) / (1<<PT_DEC_BITS); // 0.25GeV to GeV

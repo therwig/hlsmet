@@ -10,10 +10,15 @@
 #include "hls_stream.h"
 
 #define NTEST 1
-#define NPART 54
-#define FLOATPI 3.141593
 #define DEBUG 1
 #define DEBUG2 1
+
+#define NLINKSIN 2
+#define NPART 54
+#define DIV_ROUNDUP(n,d) ((n + d - 1) / d)
+// must choose a clean divisor for now
+
+
 
 //
 // Input / Output types
@@ -37,7 +42,9 @@ typedef ap_int<PHI_SIZE> phi_t;
 // define for word inputs
 typedef ap_uint<64> word_t;
 typedef ap_int<16> var_t;
-typedef struct { word_t data[NPART];} PFInputWords;
+//typedef struct { word_t data[NPART];} PFInputWords;
+typedef struct { word_t data[NLINKSIN];} PFInputWords;
+
 // top algs
 void met_ref(float in_pt[NPART], float in_phi[NPART], float& out_pt, float& out_phi);
 //void met_hw(word_t inputs[NPART], pt2_t& res_pt2, phi_t& res_phi);
@@ -58,7 +65,7 @@ void init_projx_table(pt_T table_out[PROJ_TAB_SIZE]) {
     // multiply result by 2^(PT_SIZE) (equal to 1 in our units)
     for (int i = 0; i < PROJ_TAB_SIZE; i++) {
         //store result, guarding overflow near costheta=1
-        pt2_t x = round((1<<PT_SIZE) * cos(float(i)/PROJ_TAB_SIZE * FLOATPI/2));
+        pt2_t x = round((1<<PT_SIZE) * cos(float(i)/PROJ_TAB_SIZE * M_PI/2));
         // (using extra precision here (pt2_t, not pt_t) to check the out of bounds condition)
         if(x >= (1<<PT_SIZE)) table_out[i] = (1<<PT_SIZE)-1;
         else table_out[i] = x;
@@ -103,7 +110,7 @@ void init_projy_table(pt_T table_out[PROJ_TAB_SIZE]) {
     // multiply result by 1=2^(PT-SIZE)
     // see comments in the above ProjX function
     for (int i = 0; i < PROJ_TAB_SIZE; i++) {
-        pt2_t x = round((1<<PT_SIZE) * sin(float(i)/PROJ_TAB_SIZE * FLOATPI/2));
+        pt2_t x = round((1<<PT_SIZE) * sin(float(i)/PROJ_TAB_SIZE * M_PI/2));
         if(x >= (1<<PT_SIZE)) table_out[i] = (1<<PT_SIZE)-1;
         else table_out[i] = x;
     }
@@ -170,7 +177,7 @@ void init_atan_table(phi_T table_out[ATAN_TAB_SIZE]) {
     // multiply result by 1=2^(PT-SIZE) 
     table_out[0]=int(0);
     for (int i = 1; i < ATAN_TAB_SIZE; i++) {
-        table_out[i] = int(round(atan(float(i)/ATAN_TAB_SIZE) * (1<<(PHI_SIZE-3)) / (FLOATPI/4)));
+        table_out[i] = int(round(atan(float(i)/ATAN_TAB_SIZE) * (1<<(PHI_SIZE-3)) / (M_PI/4)));
     }
     return;
 }
@@ -187,7 +194,7 @@ void init_acos_table(phi_T table_out[ACOS_TAB_SIZE]){
         /* } */
     if(DEBUG) std::cout << "initializing acos table \n";
     for(int i = 0; i<ACOS_TAB_SIZE; i++){
-        table_out[i] = (1<<(PHI_SIZE-2)) * acos(i/float(ACOS_TAB_SIZE-1)) / (FLOATPI/2); // maps [0, 1023] to [acos(0), acos(1023/1023)] *** 3.1415/2
+        table_out[i] = (1<<(PHI_SIZE-2)) * acos(i/float(ACOS_TAB_SIZE-1)) / (M_PI/2); // maps [0, 1023] to [acos(0), acos(1023/1023)] *** 3.1415/2
         if(0) std::cout << "  " << i << " -> " << table_out[i] << std::endl;
     }
     return;
