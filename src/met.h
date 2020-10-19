@@ -9,11 +9,11 @@
 #include "hls_math.h"
 #include "hls_stream.h"
 
-#define NTEST 1
+#define NTEST 50
 #define NPART 54
 #define FLOATPI 3.141593
-#define DEBUG 1
-#define DEBUG2 1
+#define DEBUG 1  //common DEBUG
+#define DEBUG2 0  //detail and loop DEBUG
 
 //
 // Input / Output types
@@ -185,7 +185,7 @@ void init_acos_table(phi_T table_out[ACOS_TAB_SIZE]){
         /*     table_out[INDEX] = acos(2*((ACOS_TAB_SIZE-1)-i)/float(ACOS_TAB_SIZE)-1); */
         /*     INDEX++; */
         /* } */
-    if(DEBUG) std::cout << "initializing acos table \n";
+    if(DEBUG) std::cout << "...initializing acos table... \n";
     for(int i = 0; i<ACOS_TAB_SIZE; i++){
         table_out[i] = (1<<(PHI_SIZE-2)) * acos(i/float(ACOS_TAB_SIZE-1)) / (FLOATPI/2); // maps [0, 1023] to [acos(0), acos(1023/1023)] *** 3.1415/2
         if(0) std::cout << "  " << i << " -> " << table_out[i] << std::endl;
@@ -231,8 +231,8 @@ template<class pxy_T, class phi_T, class pt2_T>
 
     //index = (((px/hls::sqrt(pt))+1)/2)*ACOS_TAB_SIZE;
     /* std::cout << "absval_px=" << int(absval_px) << "  pt=" << int(hls::sqrt(pt)) << "  (tab size-1)=" << int((ACOS_TAB_SIZE-1)) << "  phi=" << int(absval_px/hls::sqrt(pt)*(ACOS_TAB_SIZE-1)) << std::endl; */
-    std::cout 
-        << "px=" << int(px) 
+    if(DEBUG2){std::cout 
+        << "    px=" << int(px) 
         << "  py=" << int(py) 
         << "  pt2=" << int(pt2) 
         << "  pt=" << int(pt) 
@@ -240,6 +240,7 @@ template<class pxy_T, class phi_T, class pt2_T>
         << "  index=" << int(index) 
         << "  phi=" << int(phi) 
         << std::endl;
+	}
 
     //convert phi from (0,pi/2) to (-pi to pi)
     if(px < 0) phi = (1<<(PHI_SIZE-1)) - phi; // 2pi = 2^PHI_SIZE, so pi = 1<<(PHI_SIZE-1)

@@ -31,7 +31,7 @@ int alg_test(const char* dumpfile="") {
     // read data words from inputs
     //
     std::string baseDir = "../../../..";
-    std::ifstream infile(baseDir+"/TTbar_1evt_54lnk.dump");
+    std::ifstream infile(baseDir+"/TTbar_50evt_54part_v2.dump");
     std::string line;
     std::vector<std::vector<word_t> > word_list;
     while(std::getline(infile, line)){
@@ -52,6 +52,8 @@ int alg_test(const char* dumpfile="") {
     // run tests
     //
     for (int i=0; i<NTEST; ++i){
+		std::cout<<std::endl;
+		std::cout<<"...::: Start "<<i<<" Event :::..."<<std::endl;
 
         // pack words into stream
         hls::stream<PFInputWords> input_stream;
@@ -60,10 +62,12 @@ int alg_test(const char* dumpfile="") {
             input_array.data[j] = word_list[i][j];
             // ref pt
             in_pt[j] = word_list[i][j](63,48);
+			cout<<j<<" input pt, phi "<<in_pt[j]<<", ";
             if(in_pt[j] > (1<<16)) in_pt[j] = in_pt[j] - (1<<16);
             in_pt[j] = in_pt[j] / (1<<PT_DEC_BITS);
             // ref phi
             in_phi[j] = word_list[i][j](47,32);
+			cout<<in_phi[j]<<endl;
             if(in_phi[j] > (1<<16)) in_phi[j] = in_phi[j] - (1<<16);
             in_phi[j] = in_phi[j] * (2*FLOATPI)/(1<<PHI_SIZE);
         }
@@ -79,21 +83,30 @@ int alg_test(const char* dumpfile="") {
 
         // compare outputs
         //
-        if(DEBUG) std::cout<< "output "<<output<<std::endl;
+		if(DEBUG) std::cout<< " >>> Compare Outputs <<<"<<std::endl;
+        if(DEBUG) std::cout<< "   HW 58 bits output: "<<output<<std::endl;
         int16_t val_pt_hw;
         int16_t val_phi_hw;
-        val_pt_hw = output(63,48);
-        val_phi_hw = output(47,32);
+        val_pt_hw = output(57,42);
+        val_phi_hw = output(41,32);
+		if(val_phi_hw > (1<<9)) val_phi_hw = val_phi_hw - (1<<10); //Convert overflow of minus value.
 
-        if(DEBUG) std::cout << " val_pt & phi_hw : "<<val_pt_hw<<", "<<val_phi_hw<<std::endl;
-        if(DEBUG) printf("%04X%04X%04X%04X\n",uint16_t(val_pt_hw),uint16_t(val_phi_hw),uint16_t(output(31,16)),uint16_t(output(15,0)));
+		if(DEBUG){
+            std::cout << "   val_pt & phi_hw : "<<val_pt_hw<<", "<<val_phi_hw<<std::endl;
+			if(DEBUG2){
+            	std::cout << "   uint16 val_pt & phi_hw : "<<(uint16_t)val_pt_hw<<", "<<(uint16_t)val_phi_hw<<std::endl;
+            	std::cout << "   Convert scale float val_pt & phi_hw : "<<(float)val_pt_hw / 4<<", "<<(float)val_phi_hw / (4*(180/3.1415))<<std::endl;
+			}
+            printf("   HW hex: %04X%04X%04X%04X\n",uint16_t(val_pt_hw),uint16_t(val_phi_hw),uint16_t(output(31,16)),uint16_t(output(15,0)));
+		}
 
-        if(1) std::cout << " REF : met(pt = " << out_pt << ", phi = "<< out_phi << ")\n";
+        std::cout << " REF : met(pt = " << out_pt << ", phi = "<< out_phi << ")\n";
         // for HW alg, convert back to nice units for printing
         int out_phi_hw_int = float(val_phi_hw);
-        float out_phi_hw_rad = float(val_phi_hw) * (2*FLOATPI)/(1<<PHI_SIZE);
+        //float out_phi_hw_rad = float(val_phi_hw) * (2*FLOATPI)/(1<<PHI_SIZE);
+        float out_phi_hw_rad = float(val_phi_hw) /(4*(180/3.141));
         float out_pt_hw = float(val_pt_hw) / (1<<PT_DEC_BITS); // 0.25GeV to GeV
-        if(1) std::cout << "  HW : met(pt = " << out_pt_hw << ", phi = "<< out_phi_hw_rad << ")\n";
+        std::cout << " HW : met(pt = " << out_pt_hw << ", phi = "<< out_phi_hw_rad << ")\n\n";
 
         //if not debugging the full event details, print a compact output (in nice units)
         if(false && !DEBUG && NTEST<=100)
