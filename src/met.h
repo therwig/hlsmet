@@ -13,6 +13,7 @@
 #define NPART 54
 #define FLOATPI 3.141593
 #define DEBUG 1
+#define DEBUG_PARTS 1
 #define DEBUG2 1
 
 //
@@ -42,7 +43,10 @@ typedef struct { word_t data[NPART];} PFInputWords;
 void met_ref(float in_pt[NPART], float in_phi[NPART], float& out_pt, float& out_phi);
 //void met_hw(word_t inputs[NPART], pt2_t& res_pt2, phi_t& res_phi);
 //void met_hw_old(word_t inputs[NPART],  word_t &output);
+
 void met_hw(hls::stream<PFInputWords> &inputs, hls::stream<word_t> &output);
+void sum_inputs(hls::stream<PFInputWords> &inputs, pxy_t &met_x, pxy_t &met_y);
+void calc_met(pxy_t met_x, pxy_t met_y, hls::stream<word_t> &output);
 
 //
 // Lookup tables for pt projections to X, Y

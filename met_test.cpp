@@ -19,6 +19,18 @@ int alg_test(const char* dumpfile="") {
     // The conventional test algorithm that compares the final outputs 
     // of HLS and floating point calculations
 
+    cout << "quicktest" << endl;
+    ap_fixed<4,2> f(0);
+    ap_ufixed<4,2> uf(0);
+    float v=-20.;
+    while(v < 20.){
+        f = v;
+        uf=v;
+        v += 0.01;
+        cout << v << "\t" << f << "\t" << uf << endl;
+    }
+
+
     // calculate met for NPART particles
     float in_pt[NPART], in_phi[NPART];
     float out_pt, out_phi;

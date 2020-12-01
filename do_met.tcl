@@ -19,7 +19,7 @@ create_clock -period 4.16667 -name default
 # do stuff
 csim_design
 csynth_design
-# cosim_design -trace_level all
+cosim_design -trace_level all -rtl vhdl
 # export_design -format ip_catalog  -vendor "cern-cms"
 
 # exit Vivado HLS
