@@ -31,7 +31,8 @@ int alg_test(const char* dumpfile="") {
     // read data words from inputs
     //
     std::string baseDir = "../../../..";
-    std::ifstream infile(baseDir+"/TTbar_1000evt_128part_v2.dump");
+    //std::ifstream infile(baseDir+"/TTbar_1000evt_128part_v2.dump");
+    std::ifstream infile(baseDir+"/TTbar_1evt_54lnk.dump");
     std::string line;
     std::vector<std::vector<word_t> > word_list;
     while(std::getline(infile, line)){
