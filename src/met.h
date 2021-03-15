@@ -9,8 +9,8 @@
 #include "hls_math.h"
 #include "hls_stream.h"
 
-#define NTEST 1
-#define NPART 54
+#define NTEST 5
+#define NPART 128
 #define FLOATPI 3.141593
 #define DEBUG 1
 #define DEBUG_PARTS 1

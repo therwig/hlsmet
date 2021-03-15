@@ -11,7 +11,7 @@
 
 void met_hw(hls::stream<PFInputWords> &inputs, hls::stream<word_t> &output){
     // accumulate inputs
-    #pragma dataflow
+    // #pragma dataflow
     pxy_t met_x=0;
     pxy_t met_y=0;
     sum_inputs(inputs, met_x, met_y);
