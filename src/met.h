@@ -168,7 +168,7 @@ void init_atan_table(phi_T table_out[ATAN_TAB_SIZE]) {
     return;
 }
 
-template<class pxy_T, class phi_T, class pt_T>
+template<class pxy_T, class phi_T>
     void PhiFromXY(pxy_T px, pxy_T py, phi_T &phi){
 
     // Initialize the lookup tables

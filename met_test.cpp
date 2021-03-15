@@ -90,7 +90,7 @@ int alg_test() {
     return 0;
 }
 
-
+/*
 int full_alg_test() {
     // Not really a test alg in the conventional sense, but rather 
     // a step-by-step comparison for each element of the algorithm
@@ -209,6 +209,7 @@ int full_alg_test() {
 
     return 0;
 }
+*/
 
 int main() {
 
