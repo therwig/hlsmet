@@ -12,7 +12,7 @@ HLS implementation of MET calculation from PF objects
 void met_hw(pt_t data_pt[NPART], phi_t data_phi[NPART], pt2_t& res_pt2, phi_t& res_phi){
     #pragma HLS ARRAY_PARTITION variable=data_pt complete
     #pragma HLS ARRAY_PARTITION variable=data_phi complete
-    #pragma HLS pipeline ii=6
+    #pragma HLS pipeline ii=54
     
     if(DEBUG) std::cout << "  HW Begin" << std::endl;
 
@@ -36,7 +36,6 @@ void met_hw(pt_t data_pt[NPART], phi_t data_phi[NPART], pt2_t& res_pt2, phi_t& r
     }
 
     res_pt2 = sum_x*sum_x + sum_y*sum_y;
-
     PhiFromXY(sum_x,sum_y,res_phi);
 
     return;

@@ -13,14 +13,14 @@ open_solution -reset "solution1"
 #	xcku5p-sfvb784-3-e
 #	xcku115-flvf1924-2-i
 #	xcvu9p-flga2104-2l-e
-set_part {xcvu9p-flga2104-2l-e}
-create_clock -period 4.16667 -name default
+set_part {xcvu9p-flga2577-2-e}
+create_clock -period 2.777778 -name default
 
 # do stuff
 csim_design
 csynth_design
-# cosim_design -trace_level all
-# export_design -format ip_catalog  -vendor "cern-cms"
+cosim_design -trace_level all
+export_design -format ip_catalog  -vendor "cern-cms"
 
 # exit Vivado HLS
 exit
