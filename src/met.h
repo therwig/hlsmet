@@ -19,7 +19,7 @@
 //    px, py need to be signed
 //    pT^2 needs double precision as pT
 // TDR: 16 bits, 1/4 GeV. For us, 12 bits probably OK (1024 GeV) but would need to add overflow checks
-#define PT_SIZE 16
+#define PT_SIZE 14
 typedef ap_uint<PT_SIZE> pt_t;
 typedef ap_int<PT_SIZE+1> pxy_t;
 #define PT2_SIZE 2*PT_SIZE
